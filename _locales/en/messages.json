@@ -1,0 +1,110 @@
+{
+  "appName": {
+    "message": "TimeTrack"
+  },
+  "appDesc": {
+    "message": "Understand where your browsing time goes. Automatic, local and private."
+  },
+  "activeBrowsing": {
+    "message": "active browsing"
+  },
+  "topWebsites": {
+    "message": "Top websites"
+  },
+  "emptyTitle": {
+    "message": "No browsing activity yet"
+  },
+  "emptyBody": {
+    "message": "Start browsing and TimeTrack will show where your time goes."
+  },
+  "loadError": {
+    "message": "Unable to load stats. Close and reopen to try again."
+  },
+  "openDashboard": {
+    "message": "View detailed analytics"
+  },
+  "localFooter": {
+    "message": "Stored locally on this device · never uploaded"
+  },
+  "noActivePage": {
+    "message": "No active page"
+  },
+  "deltaUp": {
+    "message": "↑ $1$% vs yesterday"
+  },
+  "deltaDown": {
+    "message": "↓ $1$% vs yesterday"
+  },
+  "deltaSame": {
+    "message": "Same as yesterday"
+  },
+  "deltaFirst": {
+    "message": "First day of tracking"
+  },
+  "shareToday": {
+    "message": "$1$% of today"
+  },
+  "rangeToday": {
+    "message": "Today"
+  },
+  "range7": {
+    "message": "7 Days"
+  },
+  "range30": {
+    "message": "30 Days"
+  },
+  "totalTime": {
+    "message": "Total time"
+  },
+  "activeSites": {
+    "message": "Active sites"
+  },
+  "dailyAverage": {
+    "message": "Daily average"
+  },
+  "mostUsed": {
+    "message": "Most used"
+  },
+  "trend7": {
+    "message": "Last 7 days"
+  },
+  "trend30": {
+    "message": "Last 30 days"
+  },
+  "websites": {
+    "message": "Websites"
+  },
+  "sortTime": {
+    "message": "Time used"
+  },
+  "sortVisits": {
+    "message": "Visits"
+  },
+  "sortAlpha": {
+    "message": "Alphabetical"
+  },
+  "periodEmptyTitle": {
+    "message": "No browsing activity in this period"
+  },
+  "todayLabel": {
+    "message": "Today · $1$"
+  },
+  "shareTotal": {
+    "message": "$1$% of total"
+  },
+  "visits": {
+    "message": "$1$ visits"
+  },
+  "visitOne": {
+    "message": "$1$ visit"
+  },
+  "ariaPrev": {
+    "message": "Previous day"
+  },
+  "ariaNext": {
+    "message": "Next day"
+  },
+  "ariaSort": {
+    "message": "Sort websites"
+  }
+}

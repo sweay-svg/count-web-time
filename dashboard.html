@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <title>TimeTrack Dashboard</title>
@@ -9,16 +9,16 @@
   <header class="db-header">
     <div class="db-brand">TimeTrack</div>
     <div class="db-segments" id="rangeTabs" role="tablist">
-      <button type="button" class="seg is-active" data-days="1" role="tab">Today</button>
-      <button type="button" class="seg" data-days="7" role="tab">7 Days</button>
-      <button type="button" class="seg" data-days="30" role="tab">30 Days</button>
+      <button type="button" class="seg is-active" data-days="1" role="tab">__MSG_rangeToday__</button>
+      <button type="button" class="seg" data-days="7" role="tab">__MSG_range7__</button>
+      <button type="button" class="seg" data-days="30" role="tab">__MSG_range30__</button>
     </div>
   </header>
 
   <div class="db-datebar">
-    <button type="button" class="icon-btn" id="prevDay" aria-label="Previous">‹</button>
+    <button type="button" class="icon-btn" id="prevDay" aria-label="__MSG_ariaPrev__">‹</button>
     <div class="db-rangelabel" id="rangeLabel"></div>
-    <button type="button" class="icon-btn" id="nextDay" aria-label="Next">›</button>
+    <button type="button" class="icon-btn" id="nextDay" aria-label="__MSG_ariaNext__">›</button>
   </div>
 
   <div class="db-current" id="currentSite"></div>
@@ -26,19 +26,19 @@
   <main class="db-main">
     <section class="db-cards">
       <div class="card stat-card">
-        <div class="stat-label">Total time</div>
+        <div class="stat-label">__MSG_totalTime__</div>
         <div class="stat-value" id="cTotal">–</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Active sites</div>
+        <div class="stat-label">__MSG_activeSites__</div>
         <div class="stat-value" id="cSites">–</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Daily average</div>
+        <div class="stat-label">__MSG_dailyAverage__</div>
         <div class="stat-value" id="cAvg">–</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Most used</div>
+        <div class="stat-label">__MSG_mostUsed__</div>
         <div class="stat-value stat-value-domain" id="cMost">–</div>
       </div>
     </section>
@@ -50,11 +50,11 @@
 
     <section class="card rank-card" id="rankCard">
       <div class="rank-head">
-        <div class="stat-label">Websites</div>
-        <select id="sortBy" class="sort-select" aria-label="Sort websites">
-          <option value="time">Time used</option>
-          <option value="visits">Visits</option>
-          <option value="alpha">Alphabetical</option>
+        <div class="stat-label">__MSG_websites__</div>
+        <select id="sortBy" class="sort-select" aria-label="__MSG_ariaSort__">
+          <option value="time">__MSG_sortTime__</option>
+          <option value="visits">__MSG_sortVisits__</option>
+          <option value="alpha">__MSG_sortAlpha__</option>
         </select>
       </div>
       <div id="rankList"></div>
@@ -65,16 +65,16 @@
         <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
         <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <div class="db-empty-title">No browsing activity in this period</div>
-      <p>Start browsing and TimeTrack<br>will show where your time goes.</p>
+      <div class="db-empty-title">__MSG_periodEmptyTitle__</div>
+      <p>__MSG_emptyBody__</p>
     </section>
 
     <section class="db-error" id="errorState" hidden>
-      Unable to load stats. Close and reopen this panel to try again.
+      __MSG_loadError__
     </section>
   </main>
 
-  <footer class="db-footer">Stored locally on this device · never uploaded</footer>
+  <footer class="db-footer">__MSG_localFooter__</footer>
 
   <script type="module" src="dashboard.js"></script>
 </body>

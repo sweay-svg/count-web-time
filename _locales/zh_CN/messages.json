@@ -1,0 +1,107 @@
+{
+  "appName": {
+    "message": "TimeTrack"
+  },
+  "appDesc": {
+    "message": "看清你的浏览时间去向：自动记录、纯本地保存、注重隐私。"
+  },
+  "activeBrowsing": {
+    "message": "活跃浏览时长"
+  },
+  "topWebsites": {
+    "message": "网站排行"
+  },
+  "emptyTitle": {
+    "message": "还没有浏览记录"
+  },
+  "emptyBody": {
+    "message": "开始浏览后，TimeTrack 会展示你的时间去向。"
+  },
+  "loadError": {
+    "message": "统计数据加载失败，请关闭后重新打开。"
+  },
+  "openDashboard": {
+    "message": "查看详细统计"
+  },
+  "localFooter": {
+    "message": "数据仅保存在本机 · 绝不上传"
+  },
+  "noActivePage": {
+    "message": "当前没有活动页面"
+  },
+  "deltaUp": {
+    "message": "较昨天 ↑ $1$%"
+  },
+  "deltaDown": {
+    "message": "较昨天 ↓ $1$%"
+  },
+  "deltaSame": {
+    "message": "与昨天持平"
+  },
+  "deltaFirst": {
+    "message": "记录的第一天"
+  },
+  "shareToday": {
+    "message": "占今日 $1$%"
+  },
+  "rangeToday": {
+    "message": "今天"
+  },
+  "range7": {
+    "message": "近 7 天"
+  },
+  "range30": {
+    "message": "近 30 天"
+  },
+  "totalTime": {
+    "message": "总时长"
+  },
+  "activeSites": {
+    "message": "活跃网站"
+  },
+  "dailyAverage": {
+    "message": "日均时长"
+  },
+  "mostUsed": {
+    "message": "最常用网站"
+  },
+  "trend7": {
+    "message": "近 7 天趋势"
+  },
+  "trend30": {
+    "message": "近 30 天趋势"
+  },
+  "websites": {
+    "message": "网站列表"
+  },
+  "sortTime": {
+    "message": "按时长"
+  },
+  "sortVisits": {
+    "message": "按访问次数"
+  },
+  "sortAlpha": {
+    "message": "按字母"
+  },
+  "periodEmptyTitle": {
+    "message": "该时段还没有浏览记录"
+  },
+  "todayLabel": {
+    "message": "今天 · $1$"
+  },
+  "shareTotal": {
+    "message": "占比 $1$%"
+  },
+  "visits": {
+    "message": "$1$ 次访问"
+  },
+  "ariaPrev": {
+    "message": "前一天"
+  },
+  "ariaNext": {
+    "message": "后一天"
+  },
+  "ariaSort": {
+    "message": "网站排序方式"
+  }
+}

@@ -30,6 +30,7 @@
 - 正常浏览即可，计时全自动。
 - 点击工具栏图标打开 popup：今日总时长、环比昨天、当前网站、Top 5 网站，每 2 秒自动刷新。
 - 点击 popup 底部的 **View detailed analytics**，在浏览器侧边栏打开完整 Dashboard，可切换 Today / 7 Days / 30 Days 并前后翻页查看历史。
+- 界面语言自动跟随浏览器：内置**简体中文**与 English，中文系统显示中文（时长显示为「1小时42分」、日期为「8月31日」），无需手动切换。
 
 ## 计时规则
 
@@ -99,7 +100,9 @@ count-web-time/
 ├── background.js        # service worker：Chrome 事件 → 计时状态机
 ├── tracker.js           # 计时状态机（纯逻辑，可离线测试）
 ├── storage.js           # chrome.storage.local 数据层
-├── utils.js             # 域名归一化 / 日期 / 时长格式化
+├── utils.js             # 域名归一化 / 日期 / 时长格式化（支持中英文）
+├── i18n.js              # 界面语言辅助（跟随浏览器语言）
+├── _locales/            # 语言包：zh_CN（简体中文）/ en（English）
 ├── popup.html/js/.css   # 工具栏弹窗（今日概览）
 └── dashboard.html/js/.css # 侧边栏 Dashboard（区间统计与趋势）
 ```

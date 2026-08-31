@@ -2,6 +2,7 @@
 // 所有动态文本走 textContent / DOM API，不用 innerHTML 拼接数据，避免 XSS。
 
 import { formatDuration, percentChange } from './utils.js';
+import { t, isZh, uiDate, UI_LOCALE } from './i18n.js';
 
 const REFRESH_MS = 2000;
 const TOP_N = 5;
@@ -28,9 +29,9 @@ function sendMessage(message) {
 
 function deltaLabel(total, yesterdayTotal) {
   const pct = percentChange(total, yesterdayTotal);
-  if (pct === null) return total > 0 ? 'First day of tracking' : '';
-  if (pct === 0) return 'Same as yesterday';
-  return `${pct > 0 ? '↑' : '↓'} ${Math.abs(pct)}% vs yesterday`;
+  if (pct === null) return total > 0 ? t('deltaFirst') : '';
+  if (pct === 0) return t('deltaSame');
+  return t(pct > 0 ? 'deltaUp' : 'deltaDown', String(Math.abs(pct)));
 }
 
 function renderCurrent(current) {
@@ -45,7 +46,7 @@ function renderCurrent(current) {
     label.textContent = current.domain;
   } else {
     el.currentSite.classList.remove('is-active');
-    label.textContent = 'No active page';
+    label.textContent = t('noActivePage');
   }
   el.currentSite.append(dot, label);
 }
@@ -76,7 +77,7 @@ function renderSites(rows, total) {
     domain.textContent = row.domain;
     const time = document.createElement('span');
     time.className = 'site-time';
-    time.textContent = formatDuration(row.ms);
+    time.textContent = formatDuration(row.ms, { locale: UI_LOCALE });
     line.append(domain, time);
 
     const bar = document.createElement('div');
@@ -88,7 +89,7 @@ function renderSites(rows, total) {
 
     const meta = document.createElement('div');
     meta.className = 'site-meta';
-    meta.textContent = `${share}% of today`;
+    meta.textContent = t('shareToday', String(share));
 
     main.append(line, bar, meta);
     item.append(avatar, main);
@@ -109,7 +110,7 @@ async function render() {
   const { today, yesterdayTotal, current } = resp;
   const hasData = today.total > 0;
 
-  el.totalTime.textContent = formatDuration(today.total);
+  el.totalTime.textContent = formatDuration(today.total, { locale: UI_LOCALE });
   el.delta.textContent = deltaLabel(today.total, yesterdayTotal);
   renderCurrent(current);
 
@@ -119,8 +120,12 @@ async function render() {
 }
 
 function init() {
-  el.dateLabel.textContent =
-    'Today · ' + new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const dateStr = uiDate(new Date(), {
+    weekday: 'short',
+    month: isZh ? 'long' : 'short',
+    day: 'numeric'
+  });
+  el.dateLabel.textContent = t('todayLabel', dateStr);
   render();
   const timer = setInterval(render, REFRESH_MS);
   window.addEventListener('unload', () => clearInterval(timer));

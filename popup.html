@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <title>TimeTrack</title>
@@ -12,15 +12,15 @@
   </header>
 
   <main class="pp-main">
-    <section class="pp-hero" aria-label="Today total">
-      <div class="pp-total" id="totalTime">0s</div>
-      <div class="pp-hero-label">active browsing</div>
+    <section class="pp-hero">
+      <div class="pp-total" id="totalTime">–</div>
+      <div class="pp-hero-label">__MSG_activeBrowsing__</div>
       <div class="pp-delta" id="delta"></div>
       <div class="pp-current" id="currentSite"></div>
     </section>
 
     <section class="pp-top" id="topSection">
-      <div class="pp-section-title">Top websites</div>
+      <div class="pp-section-title">__MSG_topWebsites__</div>
       <div id="siteList"></div>
     </section>
 
@@ -29,18 +29,18 @@
         <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
         <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <div class="pp-empty-title">No browsing activity yet</div>
-      <p>Start browsing and TimeTrack<br>will show where your time goes.</p>
+      <div class="pp-empty-title">__MSG_emptyTitle__</div>
+      <p>__MSG_emptyBody__</p>
     </section>
 
     <section class="pp-error" id="errorState" hidden>
-      Unable to load stats. Close and reopen the popup to try again.
+      __MSG_loadError__
     </section>
 
-    <button type="button" class="pp-open" id="openDashboard">View detailed analytics</button>
+    <button type="button" class="pp-open" id="openDashboard">__MSG_openDashboard__</button>
   </main>
 
-  <footer class="pp-footer">Stored locally on this device · never uploaded</footer>
+  <footer class="pp-footer">__MSG_localFooter__</footer>
 
   <script type="module" src="popup.js"></script>
 </body>

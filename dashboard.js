@@ -2,6 +2,7 @@
 // 所有动态节点用 DOM API / createElementNS 构建，不用 innerHTML 拼接数据。
 
 import { formatDuration, dateKey, shiftDateKey } from './utils.js';
+import { t, isZh, uiDate, UI_LOCALE } from './i18n.js';
 
 const REFRESH_MS = 3000;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -50,16 +51,16 @@ function parseKey(key) {
 }
 
 function shortDate(key) {
-  return parseKey(key).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return uiDate(parseKey(key), { month: isZh ? 'long' : 'short', day: 'numeric' });
 }
 
 function longDate(key) {
-  return parseKey(key).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return uiDate(parseKey(key), { weekday: 'short', month: isZh ? 'long' : 'short', day: 'numeric' });
 }
 
 function buildRangeLabel(range) {
   if (state.days === 1) {
-    return state.endDate === state.today ? `Today · ${shortDate(state.endDate)}` : longDate(state.endDate);
+    return state.endDate === state.today ? t('todayLabel', shortDate(state.endDate)) : longDate(state.endDate);
   }
   return `${shortDate(range.start)} – ${shortDate(range.end)}`;
 }
@@ -79,7 +80,7 @@ function renderChart(range) {
     return;
   }
   el.chartCard.hidden = false;
-  el.chartTitle.textContent = state.days === 7 ? 'Last 7 days' : 'Last 30 days';
+  el.chartTitle.textContent = state.days === 7 ? t('trend7') : t('trend30');
 
   const { series } = range;
   const n = series.length;
@@ -110,7 +111,7 @@ function renderChart(range) {
       class: isLatest ? 'bar is-latest' : 'bar'
     });
     const tip = svgEl('title', {});
-    tip.textContent = `${longDate(point.date)} · ${formatDuration(point.total)}`;
+    tip.textContent = `${longDate(point.date)} · ${formatDuration(point.total, { locale: UI_LOCALE })}`;
     bar.append(tip);
     svg.append(bar);
 
@@ -124,9 +125,7 @@ function renderChart(range) {
         class: 'axis-label'
       });
       const d = parseKey(point.date);
-      label.textContent = n === 7
-        ? d.toLocaleDateString('en-US', { weekday: 'short' })
-        : String(d.getDate());
+      label.textContent = n === 7 ? uiDate(d, { weekday: 'short' }) : String(d.getDate());
       svg.append(label);
     }
   });
@@ -182,7 +181,7 @@ function renderRanking(range) {
     domain.textContent = row.domain;
     const time = document.createElement('span');
     time.className = 'rank-time';
-    time.textContent = formatDuration(row.ms);
+    time.textContent = formatDuration(row.ms, { locale: UI_LOCALE });
     line.append(domain, time);
 
     const bar = document.createElement('div');
@@ -195,9 +194,12 @@ function renderRanking(range) {
     const meta = document.createElement('div');
     meta.className = 'rank-meta';
     const pct = document.createElement('span');
-    pct.textContent = `${share}% of total`;
+    pct.textContent = t('shareTotal', String(share));
     const visits = document.createElement('span');
-    visits.textContent = `${row.visits} ${row.visits === 1 ? 'visit' : 'visits'}`;
+    const n = row.visits;
+    visits.textContent = (!isZh && n === 1)
+      ? t('visitOne', String(n))
+      : t('visits', String(n));
     meta.append(pct, visits);
 
     main.append(line, bar, meta);
@@ -217,7 +219,7 @@ function renderCurrent(current) {
     pill.classList.add('is-active');
     label.textContent = current.domain;
   } else {
-    label.textContent = 'No active page';
+    label.textContent = t('noActivePage');
   }
   pill.append(dot, label);
   el.currentSite.append(pill);
@@ -236,9 +238,9 @@ async function refresh() {
   const { range, current } = resp;
 
   el.rangeLabel.textContent = buildRangeLabel(range);
-  el.cTotal.textContent = formatDuration(range.total);
+  el.cTotal.textContent = formatDuration(range.total, { locale: UI_LOCALE });
   el.cSites.textContent = String(range.activeSites);
-  el.cAvg.textContent = formatDuration(range.averageDaily);
+  el.cAvg.textContent = formatDuration(range.averageDaily, { locale: UI_LOCALE });
   el.cMost.textContent = range.mostUsed ?? '–';
   renderCurrent(current);
 

@@ -113,21 +113,32 @@ export function splitDurationByLocalDay(startMs, endMs) {
 
 /**
  * 毫秒时长格式化（SKILL 第 24 节）。
- * - 默认：  42s / 42m / 1h 42m / 1d 3h
- * - 带秒：  42s / 42m 18s / 1h 42m 18s（详细页用）
+ * - 英文（默认）：42s / 42m / 1h 42m / 1d 3h
+ * - 中文（locale 以 zh 开头）：42秒 / 42分 / 1小时42分 / 1天3小时
+ * - withSeconds：附带秒（详细场景用）
  *
  * @param {number} ms
- * @param {{withSeconds?: boolean}} [opts]
+ * @param {{withSeconds?: boolean, locale?: string}} [opts]
  * @returns {string}
  */
 export function formatDuration(ms, opts = {}) {
-  const { withSeconds = false } = opts;
+  const { withSeconds = false, locale = 'en' } = opts;
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
 
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
+
+  if (locale.toLowerCase().startsWith('zh')) {
+    if (days > 0) return hours > 0 ? `${days}天${hours}小时` : `${days}天`;
+    if (hours > 0) {
+      const base = minutes > 0 ? `${hours}小时${minutes}分` : `${hours}小时`;
+      return withSeconds ? `${base}${seconds}秒` : base;
+    }
+    if (minutes > 0) return withSeconds ? `${minutes}分${seconds}秒` : `${minutes}分`;
+    return `${seconds}秒`;
+  }
 
   if (withSeconds) {
     if (days > 0) return `${days}d ${hours}h`;
