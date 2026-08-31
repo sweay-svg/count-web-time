@@ -121,23 +121,37 @@ chrome.runtime.onStartup.addListener(safe('onStartup', async () => {
   await store.persist();
 }));
 
-// ---------- popup 取数消息 ----------
+// ---------- popup / dashboard 取数消息 ----------
+
+const RANGE_DAYS = new Set([1, 7, 30]);
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type !== 'GET_DASH') return false;
+  const type = message?.type;
+  if (type !== 'GET_DASH' && type !== 'GET_RANGE') return false;
   ready
     .then(async () => {
       const todayKey = dateKey();
       const at = Date.now();
+      if (type === 'GET_DASH') {
+        sendResponse({
+          today: tracker.liveDay(todayKey, at),
+          yesterdayTotal: store.getDay(shiftDateKey(todayKey, -1)).total,
+          current: tracker.getActiveSegment(),
+          settings: store.getSettings()
+        });
+        return;
+      }
+      // GET_RANGE：Dashboard 的 Today / 7D / 30D
+      const days = RANGE_DAYS.has(message.days) ? message.days : 1;
+      const endDate = typeof message.endDate === 'string' ? message.endDate : todayKey;
       sendResponse({
-        today: tracker.liveDay(todayKey, at),
-        yesterdayTotal: store.getDay(shiftDateKey(todayKey, -1)).total,
+        today: todayKey,
         current: tracker.getActiveSegment(),
-        settings: store.getSettings()
+        range: tracker.liveRange(endDate, days, at)
       });
     })
     .catch((err) => {
-      console.error('[TimeTrack] GET_DASH:', err);
+      console.error(`[TimeTrack] ${type}:`, err);
       sendResponse({ error: 'LOAD_FAILED' });
     });
   return true; // 异步 sendResponse

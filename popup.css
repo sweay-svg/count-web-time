@@ -235,6 +235,24 @@ body {
   font-size: 12.5px;
 }
 
+/* ---------- 打开 Dashboard ---------- */
+
+.pp-open {
+  width: 100%;
+  margin-top: 2px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pp-open:hover { background: #eef2ff; border-color: var(--primary-soft, #c7d2fe); }
+
 /* ---------- Footer ---------- */
 
 .pp-footer {

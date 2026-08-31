@@ -124,6 +124,13 @@ function init() {
   render();
   const timer = setInterval(render, REFRESH_MS);
   window.addEventListener('unload', () => clearInterval(timer));
+
+  // 在用户手势中打开 Side Panel Dashboard
+  document.getElementById('openDashboard').addEventListener('click', async () => {
+    const win = await chrome.windows.getCurrent();
+    await chrome.sidePanel.open({ windowId: win.id });
+    window.close();
+  });
 }
 
 init();

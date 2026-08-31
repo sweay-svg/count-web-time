@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TimeTrack Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header class="db-header">
+    <div class="db-brand">TimeTrack</div>
+    <div class="db-segments" id="rangeTabs" role="tablist">
+      <button type="button" class="seg is-active" data-days="1" role="tab">Today</button>
+      <button type="button" class="seg" data-days="7" role="tab">7 Days</button>
+      <button type="button" class="seg" data-days="30" role="tab">30 Days</button>
+    </div>
+  </header>
+
+  <div class="db-datebar">
+    <button type="button" class="icon-btn" id="prevDay" aria-label="Previous">‹</button>
+    <div class="db-rangelabel" id="rangeLabel"></div>
+    <button type="button" class="icon-btn" id="nextDay" aria-label="Next">›</button>
+  </div>
+
+  <div class="db-current" id="currentSite"></div>
+
+  <main class="db-main">
+    <section class="db-cards">
+      <div class="card stat-card">
+        <div class="stat-label">Total time</div>
+        <div class="stat-value" id="cTotal">–</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Active sites</div>
+        <div class="stat-value" id="cSites">–</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Daily average</div>
+        <div class="stat-value" id="cAvg">–</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Most used</div>
+        <div class="stat-value stat-value-domain" id="cMost">–</div>
+      </div>
+    </section>
+
+    <section class="card chart-card" id="chartCard">
+      <div class="stat-label" id="chartTitle"></div>
+      <div id="chart" class="chart-wrap"></div>
+    </section>
+
+    <section class="card rank-card" id="rankCard">
+      <div class="rank-head">
+        <div class="stat-label">Websites</div>
+        <select id="sortBy" class="sort-select" aria-label="Sort websites">
+          <option value="time">Time used</option>
+          <option value="visits">Visits</option>
+          <option value="alpha">Alphabetical</option>
+        </select>
+      </div>
+      <div id="rankList"></div>
+    </section>
+
+    <section class="db-empty" id="emptyState" hidden>
+      <svg class="db-empty-icon" viewBox="0 0 24 24" width="36" height="36" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div class="db-empty-title">No browsing activity in this period</div>
+      <p>Start browsing and TimeTrack<br>will show where your time goes.</p>
+    </section>
+
+    <section class="db-error" id="errorState" hidden>
+      Unable to load stats. Close and reopen this panel to try again.
+    </section>
+  </main>
+
+  <footer class="db-footer">Stored locally on this device · never uploaded</footer>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

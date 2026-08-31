@@ -1,0 +1,293 @@
+/* TimeTrack dashboard（Side Panel）— 与 popup 共用同一套克制的设计语言 */
+
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --text-2: #64748b;
+  --text-3: #94a3b8;
+  --border: #e2e8f0;
+  --track: #f1f5f9;
+  --primary: #6366f1;
+  --primary-soft: #c7d2fe;
+  --success: #22c55e;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* ---------- Header ---------- */
+
+.db-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(248, 250, 252, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+}
+
+.db-brand { font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
+
+.db-segments {
+  display: inline-flex;
+  background: var(--track);
+  border-radius: 9px;
+  padding: 2px;
+}
+
+.seg {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--text-2);
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.seg.is-active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+/* ---------- 日期翻页 ---------- */
+
+.db-datebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+}
+
+.db-rangelabel {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-2);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.icon-btn:hover:not(:disabled) { color: var(--text); border-color: var(--text-3); }
+.icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+.db-current {
+  padding: 10px 16px 0;
+  display: flex;
+}
+
+.db-current-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--track);
+  color: var(--text-2);
+  font-size: 11.5px;
+  max-width: 100%;
+}
+
+.db-current-pill .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-3); flex: none;
+}
+.db-current-pill.is-active { color: var(--text); }
+.db-current-pill.is-active .dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+.db-current-pill span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- 主区 ---------- */
+
+.db-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px 16px;
+}
+
+.db-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.stat-card { padding: 12px 14px; }
+
+.stat-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value-domain {
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- 图表 ---------- */
+
+.chart-card { padding: 14px; }
+.chart-wrap { margin-top: 10px; }
+.chart-wrap svg { display: block; width: 100%; height: auto; }
+.bar { fill: var(--primary-soft); }
+.bar.is-latest { fill: var(--primary); }
+.bar:hover { fill: var(--primary); }
+.axis-label { fill: var(--text-3); font-size: 9px; }
+.chart-empty {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+/* ---------- 排行 ---------- */
+
+.rank-card { padding: 14px; }
+
+.rank-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sort-select {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+}
+.rank-row + .rank-row { border-top: 1px solid var(--track); }
+
+.site-favicon,
+.site-fallback {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+}
+.site-favicon { object-fit: contain; padding: 4px; }
+.site-fallback {
+  background: var(--track);
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.rank-main { flex: 1; min-width: 0; }
+
+.rank-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.rank-domain {
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-time { flex: none; font-variant-numeric: tabular-nums; }
+
+.rank-bar { margin-top: 5px; height: 5px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.rank-bar-fill { height: 100%; border-radius: 999px; background: var(--primary); }
+
+.rank-meta {
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ---------- 空/错状态 ---------- */
+
+.db-empty, .db-error {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text-2);
+}
+.db-empty-icon { color: var(--text-3); margin-bottom: 8px; }
+.db-empty-title { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.db-empty p { margin: 0; font-size: 12.5px; }
+
+.db-footer {
+  padding: 8px 16px 18px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-3);
+}

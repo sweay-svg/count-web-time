@@ -18,11 +18,20 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
   // seg: { tabId:number, domain:string, startedAt:number, isNewVisit:boolean } | null
   let seg = null;
 
+  /** 把一次访问标记到最后一片（计入段结束当天），不改变时长。 */
+  function stampVisit(pieces, isNewVisit) {
+    if (isNewVisit && pieces.length > 0) pieces[pieces.length - 1].visits = 1;
+    return pieces;
+  }
+
   /** 结算当前活跃段：[startedAt, at) 按本地天拆分后累加，不主动改 current。 */
   function settle(at) {
     if (!seg) return;
-    const pieces = splitDurationByLocalDay(seg.startedAt, at);
-    store.addTime(seg.domain, pieces, at, { countVisit: seg.isNewVisit });
+    const pieces = stampVisit(
+      splitDurationByLocalDay(seg.startedAt, at),
+      seg.isNewVisit
+    );
+    store.addTime(seg.domain, pieces, at);
     seg = null;
   }
 
@@ -96,9 +105,12 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
   function checkpoint(at = nowFn()) {
     if (!seg) return;
     const current = seg;
-    const pieces = splitDurationByLocalDay(current.startedAt, at);
     // 消费当前段的 visit 标记：新访问在首次结转时入账，后续结转不再重复。
-    store.addTime(current.domain, pieces, at, { countVisit: current.isNewVisit });
+    const pieces = stampVisit(
+      splitDurationByLocalDay(current.startedAt, at),
+      current.isNewVisit
+    );
+    store.addTime(current.domain, pieces, at);
     seg = { tabId: current.tabId, domain: current.domain, startedAt: at, isNewVisit: false };
     store.setCurrent({ ...seg });
   }
@@ -135,12 +147,40 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
         if (piece.date !== date) continue;
         const row = day.rows.find((r) => r.domain === seg.domain);
         if (row) row.ms += piece.ms;
-        else day.rows.push({ domain: seg.domain, ms: piece.ms });
+        else day.rows.push({ domain: seg.domain, ms: piece.ms, visits: 0 });
         day.total += piece.ms;
       }
       day.rows.sort((a, b) => b.ms - a.ms);
     }
     return day;
+  }
+
+  /**
+   * 区间实时统计 = store.getRange + 当前未结算段（仅当落在区间日期内）。
+   * Dashboard 的 Today/7D/30D 统一走这里，当前段不提前计 visit。
+   */
+  function liveRange(endDate, days, at = nowFn()) {
+    const range = store.getRange(endDate, days);
+    if (!seg) return range;
+
+    const indexByDate = new Map(range.keys.map((date, i) => [date, i]));
+    for (const piece of splitDurationByLocalDay(seg.startedAt, at)) {
+      const dayIndex = indexByDate.get(piece.date);
+      if (dayIndex === undefined) continue;
+      let row = range.rows.find((r) => r.domain === seg.domain);
+      if (!row) {
+        row = { domain: seg.domain, ms: 0, visits: 0 };
+        range.rows.push(row);
+      }
+      row.ms += piece.ms;
+      range.total += piece.ms;
+      range.series[dayIndex].total += piece.ms;
+    }
+    range.rows = range.rows.filter((r) => r.ms > 0).sort((a, b) => b.ms - a.ms);
+    range.activeSites = range.rows.length;
+    range.averageDaily = Math.round(range.total / range.days);
+    range.mostUsed = range.rows[0]?.domain ?? null;
+    return range;
   }
 
   return {
@@ -153,6 +193,7 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     reset,
     restore,
     getActiveSegment,
-    liveDay
+    liveDay,
+    liveRange
   };
 }
