@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TimeTrack</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="pp-header">
+    <div class="pp-brand">TimeTrack</div>
+    <div class="pp-date" id="dateLabel"></div>
+  </header>
+
+  <main class="pp-main">
+    <section class="pp-hero" aria-label="Today total">
+      <div class="pp-total" id="totalTime">0s</div>
+      <div class="pp-hero-label">active browsing</div>
+      <div class="pp-delta" id="delta"></div>
+      <div class="pp-current" id="currentSite"></div>
+    </section>
+
+    <section class="pp-top" id="topSection">
+      <div class="pp-section-title">Top websites</div>
+      <div id="siteList"></div>
+    </section>
+
+    <section class="pp-empty" id="emptyState" hidden>
+      <svg class="pp-empty-icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div class="pp-empty-title">No browsing activity yet</div>
+      <p>Start browsing and TimeTrack<br>will show where your time goes.</p>
+    </section>
+
+    <section class="pp-error" id="errorState" hidden>
+      Unable to load stats. Close and reopen the popup to try again.
+    </section>
+  </main>
+
+  <footer class="pp-footer">Stored locally on this device · never uploaded</footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

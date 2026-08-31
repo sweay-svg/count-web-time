@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "TimeTrack",
+  "version": "0.1.0",
+  "description": "Understand where your browsing time goes. Automatic, local and private.",
+  "permissions": ["storage", "tabs", "idle", "alarms"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "TimeTrack",
+    "default_popup": "popup.html"
+  }
+}

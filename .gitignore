@@ -1,0 +1,14 @@
+# 开发/测试辅助文件，不属于扩展运行时
+/tests/
+/package.json
+
+# 需求与开发过程文档
+/SKILL.md
+/CLAUDE.md
+
+# 依赖与系统、编辑器杂项
+node_modules/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
