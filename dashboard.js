@@ -2,7 +2,7 @@
 // 所有动态节点用 DOM API / createElementNS 构建，不用 innerHTML 拼接数据。
 
 import { formatDuration, dateKey, shiftDateKey } from './utils.js';
-import { t, isZh, uiDate, UI_LOCALE } from './i18n.js';
+import { t, isZh, uiDate, UI_LOCALE, applyI18n } from './i18n.js';
 
 const REFRESH_MS = 3000;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -284,6 +284,7 @@ el.sortBy.addEventListener('change', () => {
 });
 
 // 侧边栏不可见时暂停轮询，可见时立即刷新
+applyI18n();
 let timer = setInterval(() => {
   if (!document.hidden) refresh();
 }, REFRESH_MS);

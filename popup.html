@@ -14,13 +14,13 @@
   <main class="pp-main">
     <section class="pp-hero">
       <div class="pp-total" id="totalTime">–</div>
-      <div class="pp-hero-label">__MSG_activeBrowsing__</div>
+      <div class="pp-hero-label" data-i18n="activeBrowsing">active browsing</div>
       <div class="pp-delta" id="delta"></div>
       <div class="pp-current" id="currentSite"></div>
     </section>
 
     <section class="pp-top" id="topSection">
-      <div class="pp-section-title">__MSG_topWebsites__</div>
+      <div class="pp-section-title" data-i18n="topWebsites">Top websites</div>
       <div id="siteList"></div>
     </section>
 
@@ -29,18 +29,18 @@
         <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
         <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <div class="pp-empty-title">__MSG_emptyTitle__</div>
-      <p>__MSG_emptyBody__</p>
+      <div class="pp-empty-title" data-i18n="emptyTitle">No browsing activity yet</div>
+      <p data-i18n="emptyBody">Start browsing and TimeTrack will show where your time goes.</p>
     </section>
 
     <section class="pp-error" id="errorState" hidden>
-      __MSG_loadError__
+      <span data-i18n="loadError">Unable to load stats. Close and reopen the popup to try again.</span>
     </section>
 
-    <button type="button" class="pp-open" id="openDashboard">__MSG_openDashboard__</button>
+    <button type="button" class="pp-open" id="openDashboard" data-i18n="openDashboard">View detailed analytics</button>
   </main>
 
-  <footer class="pp-footer">__MSG_localFooter__</footer>
+  <footer class="pp-footer" data-i18n="localFooter">Stored locally on this device · never uploaded</footer>
 
   <script type="module" src="popup.js"></script>
 </body>

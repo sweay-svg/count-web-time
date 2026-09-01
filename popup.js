@@ -2,7 +2,7 @@
 // 所有动态文本走 textContent / DOM API，不用 innerHTML 拼接数据，避免 XSS。
 
 import { formatDuration, percentChange } from './utils.js';
-import { t, isZh, uiDate, UI_LOCALE } from './i18n.js';
+import { t, isZh, uiDate, UI_LOCALE, applyI18n } from './i18n.js';
 
 const REFRESH_MS = 2000;
 const TOP_N = 5;
@@ -120,6 +120,7 @@ async function render() {
 }
 
 function init() {
+  applyI18n();
   const dateStr = uiDate(new Date(), {
     weekday: 'short',
     month: isZh ? 'long' : 'short',

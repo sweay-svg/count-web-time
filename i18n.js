@@ -18,3 +18,20 @@ export function t(key, ...substitutions) {
 export function uiDate(date, options) {
   return date.toLocaleDateString(isZh ? 'zh-CN' : 'en-US', options);
 }
+
+/**
+ * 本地化静态 HTML 元素：把 [data-i18n] 的 textContent 和 [data-i18n-aria-label]
+ * 的 aria-label 设为当前语言文案。
+ * HTML 中保留英文原文作为兜底，JS 启动后统一覆盖为当前语言。
+ * @param {Document | ParentNode} [root]
+ */
+export function applyI18n(root = document) {
+  if (root.querySelectorAll) {
+    root.querySelectorAll('[data-i18n]').forEach((el) => {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    root.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria-label')));
+    });
+  }
+}

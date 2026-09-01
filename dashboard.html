@@ -9,16 +9,16 @@
   <header class="db-header">
     <div class="db-brand">TimeTrack</div>
     <div class="db-segments" id="rangeTabs" role="tablist">
-      <button type="button" class="seg is-active" data-days="1" role="tab">__MSG_rangeToday__</button>
-      <button type="button" class="seg" data-days="7" role="tab">__MSG_range7__</button>
-      <button type="button" class="seg" data-days="30" role="tab">__MSG_range30__</button>
+      <button type="button" class="seg is-active" data-days="1" role="tab" data-i18n="rangeToday">Today</button>
+      <button type="button" class="seg" data-days="7" role="tab" data-i18n="range7">7 Days</button>
+      <button type="button" class="seg" data-days="30" role="tab" data-i18n="range30">30 Days</button>
     </div>
   </header>
 
   <div class="db-datebar">
-    <button type="button" class="icon-btn" id="prevDay" aria-label="__MSG_ariaPrev__">‹</button>
+    <button type="button" class="icon-btn" id="prevDay" aria-label="Previous day" data-i18n-aria-label="ariaPrev">‹</button>
     <div class="db-rangelabel" id="rangeLabel"></div>
-    <button type="button" class="icon-btn" id="nextDay" aria-label="__MSG_ariaNext__">›</button>
+    <button type="button" class="icon-btn" id="nextDay" aria-label="Next day" data-i18n-aria-label="ariaNext">›</button>
   </div>
 
   <div class="db-current" id="currentSite"></div>
@@ -26,19 +26,19 @@
   <main class="db-main">
     <section class="db-cards">
       <div class="card stat-card">
-        <div class="stat-label">__MSG_totalTime__</div>
+        <div class="stat-label" data-i18n="totalTime">Total time</div>
         <div class="stat-value" id="cTotal">–</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">__MSG_activeSites__</div>
+        <div class="stat-label" data-i18n="activeSites">Active sites</div>
         <div class="stat-value" id="cSites">–</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">__MSG_dailyAverage__</div>
+        <div class="stat-label" data-i18n="dailyAverage">Daily average</div>
         <div class="stat-value" id="cAvg">–</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">__MSG_mostUsed__</div>
+        <div class="stat-label" data-i18n="mostUsed">Most used</div>
         <div class="stat-value stat-value-domain" id="cMost">–</div>
       </div>
     </section>
@@ -50,11 +50,11 @@
 
     <section class="card rank-card" id="rankCard">
       <div class="rank-head">
-        <div class="stat-label">__MSG_websites__</div>
-        <select id="sortBy" class="sort-select" aria-label="__MSG_ariaSort__">
-          <option value="time">__MSG_sortTime__</option>
-          <option value="visits">__MSG_sortVisits__</option>
-          <option value="alpha">__MSG_sortAlpha__</option>
+        <div class="stat-label" data-i18n="websites">Websites</div>
+        <select id="sortBy" class="sort-select" aria-label="Sort websites" data-i18n-aria-label="ariaSort">
+          <option value="time" data-i18n="sortTime">Time used</option>
+          <option value="visits" data-i18n="sortVisits">Visits</option>
+          <option value="alpha" data-i18n="sortAlpha">Alphabetical</option>
         </select>
       </div>
       <div id="rankList"></div>
@@ -65,16 +65,16 @@
         <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
         <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <div class="db-empty-title">__MSG_periodEmptyTitle__</div>
-      <p>__MSG_emptyBody__</p>
+      <div class="db-empty-title" data-i18n="periodEmptyTitle">No browsing activity in this period</div>
+      <p data-i18n="emptyBody">Start browsing and TimeTrack will show where your time goes.</p>
     </section>
 
     <section class="db-error" id="errorState" hidden>
-      __MSG_loadError__
+      <span data-i18n="loadError">Unable to load stats. Close and reopen to try again.</span>
     </section>
   </main>
 
-  <footer class="db-footer">__MSG_localFooter__</footer>
+  <footer class="db-footer" data-i18n="localFooter">Stored locally on this device · never uploaded</footer>
 
   <script type="module" src="dashboard.js"></script>
 </body>
