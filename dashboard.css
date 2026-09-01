@@ -187,6 +187,14 @@ body {
   padding: 12px 16px 16px;
 }
 
+/* 列表视图：卡片之间的间距由这里控制（卡片都在 #listView 内，.db-main 管不到） */
+.db-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
 .db-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -222,12 +230,30 @@ body {
 /* ---------- 图表 ---------- */
 
 .chart-card { padding: 14px; }
-.chart-wrap { margin-top: 10px; }
+.chart-wrap { margin-top: 10px; position: relative; }
 .chart-wrap svg { display: block; width: 100%; height: auto; }
-.bar { fill: var(--primary-soft); }
+.bar { fill: var(--primary-soft); transition: fill 0.12s ease; }
 .bar.is-latest { fill: var(--primary); }
-.bar:hover { fill: var(--primary); }
+.bar.is-hover { fill: var(--primary); }
 .axis-label { fill: var(--text-3); font-size: 9px; }
+
+/* 统一图表 tooltip（深浅主题一致的深底浅字） */
+.chart-tooltip {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+.chart-tip-title { color: #94a3b8; font-size: 10.5px; }
+.chart-tip-value { font-weight: 650; font-variant-numeric: tabular-nums; }
+
 .chart-empty {
   height: 120px;
   display: flex;
@@ -236,6 +262,60 @@ body {
   color: var(--text-3);
   font-size: 12px;
 }
+
+/* ---------- 网站分布 Donut ---------- */
+
+.dist-body {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-top: 10px;
+}
+.dist-chart { min-width: 0; }
+.dist-chart svg { display: block; width: 100%; height: auto; }
+.donut-seg { transition: opacity 0.12s ease; }
+.donut-seg.is-dim { opacity: 0.28; }
+.donut-center-value {
+  fill: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.donut-center-label { fill: var(--text-3); font-size: 10px; }
+
+.dist-legend { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.dist-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  min-width: 0;
+}
+.dist-swatch { flex: none; width: 10px; height: 10px; border-radius: 3px; }
+.dist-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 550;
+}
+.dist-meta { flex: none; color: var(--text-3); font-variant-numeric: tabular-nums; font-size: 11px; }
+
+/* ---------- 详情页折线图（Line） ---------- */
+
+.line-path {
+  stroke: var(--primary);
+  stroke-width: 2;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.line-area {
+  fill: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.line-dot { fill: var(--primary); }
 
 /* ---------- 排行 ---------- */
 

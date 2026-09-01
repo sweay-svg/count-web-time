@@ -71,6 +71,18 @@
   "trend30": {
     "message": "Last 30 days"
   },
+  "chartEmpty": {
+    "message": "No activity in this period"
+  },
+  "distributionTitle": {
+    "message": "Website distribution"
+  },
+  "distOther": {
+    "message": "Other"
+  },
+  "distSites": {
+    "message": "sites"
+  },
   "websites": {
     "message": "Websites"
   },

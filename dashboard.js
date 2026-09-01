@@ -4,9 +4,9 @@
 import { formatDuration, dateKey, shiftDateKey } from './utils.js';
 import { t, isZh, uiDate, UI_LOCALE, applyI18n } from './i18n.js';
 import { applyTheme } from './theme.js';
+import { renderBarChart, renderDonut, renderLineChart } from './charts.js';
 
 const REFRESH_MS = 3000;
-const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const state = {
   view: 'list',          // 'list' | 'detail'
@@ -32,6 +32,9 @@ const el = {
   chartCard: document.getElementById('chartCard'),
   chartTitle: document.getElementById('chartTitle'),
   chart: document.getElementById('chart'),
+  distributionCard: document.getElementById('distributionCard'),
+  distributionChart: document.getElementById('distributionChart'),
+  distributionLegend: document.getElementById('distributionLegend'),
   sortBy: document.getElementById('sortBy'),
   rankCard: document.getElementById('rankCard'),
   rankList: document.getElementById('rankList'),
@@ -86,74 +89,6 @@ function buildRangeLabel(range) {
     return state.endDate === state.today ? t('todayLabel', shortDate(state.endDate)) : longDate(state.endDate);
   }
   return `${shortDate(range.start)} – ${shortDate(range.end)}`;
-}
-
-// ---------- SVG 柱状图（列表 7/30 天 + 详情 30 天共用） ----------
-
-function svgEl(tag, attrs = {}) {
-  const node = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-  return node;
-}
-
-/**
- * 把 series（[{date, total}]）画进 container；days 决定 X 轴标签密度。
- * @param {HTMLElement} container
- * @param {{date: string, total: number}[]} series
- * @param {number} days 7 或 30
- */
-function renderBarChart(container, series, days) {
-  container.textContent = '';
-  if (!series || series.length === 0) return;
-
-  const n = series.length;
-  const W = 320;
-  const H = 140;
-  const padX = 4;
-  const top = 10;
-  const axisH = 16;
-  const plotH = H - top - axisH;
-  const max = Math.max(1, ...series.map((s) => s.total));
-  const slot = (W - padX * 2) / n;
-  const barW = Math.max(2, Math.min(slot - 2, n === 7 ? 26 : 9));
-
-  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img' });
-
-  series.forEach((point, i) => {
-    const h = point.total > 0 ? Math.max(2, (point.total / max) * plotH) : 0;
-    const x = padX + i * slot + (slot - barW) / 2;
-    const y = top + plotH - h;
-    const isLatest = i === n - 1;
-
-    const bar = svgEl('rect', {
-      x: x.toFixed(1),
-      y: y.toFixed(1),
-      width: barW.toFixed(1),
-      height: h.toFixed(1),
-      rx: 2,
-      class: isLatest ? 'bar is-latest' : 'bar'
-    });
-    const tip = svgEl('title', {});
-    tip.textContent = `${longDate(point.date)} · ${formatDuration(point.total, { locale: UI_LOCALE })}`;
-    bar.append(tip);
-    svg.append(bar);
-
-    // 7 天全部标星期；30 天每 5 天 + 最后一天标日期数字
-    const showLabel = days === 7 || i % 5 === 0 || i === n - 1;
-    if (showLabel) {
-      const label = svgEl('text', {
-        x: (padX + i * slot + slot / 2).toFixed(1),
-        y: H - 3,
-        'text-anchor': 'middle',
-        class: 'axis-label'
-      });
-      const d = parseKey(point.date);
-      label.textContent = days === 7 ? uiDate(d, { weekday: 'short' }) : String(d.getDate());
-      svg.append(label);
-    }
-  });
-
-  container.append(svg);
 }
 
 // ---------- 网站排行 ----------
@@ -282,11 +217,10 @@ function renderDetail(detail, current) {
   el.dAvg.textContent = fmt(detail.avgSession);
   el.dVisits.textContent = String(detail.total.visits);
 
-  // 每日活动图：近 30 天
-  renderBarChart(
+  // 每日活动图：近 30 天折线图
+  renderLineChart(
     el.detailChart,
-    detail.series.map((p) => ({ date: p.date, total: p.ms })),
-    30
+    detail.series.map((p) => ({ date: p.date, total: p.ms }))
   );
 
   // 最近会话（最新在前）
@@ -366,6 +300,7 @@ async function refreshList() {
   el.emptyState.hidden = !isEmpty;
   el.chartCard.style.display = isEmpty ? 'none' : '';
   el.rankCard.style.display = isEmpty ? 'none' : '';
+  el.distributionCard.style.display = isEmpty ? 'none' : '';
   if (!isEmpty) {
     if (state.days === 1) {
       el.chartCard.hidden = true;
@@ -374,6 +309,7 @@ async function refreshList() {
       el.chartTitle.textContent = state.days === 7 ? t('trend7') : t('trend30');
       renderBarChart(el.chart, range.series, state.days);
     }
+    renderDonut(el.distributionChart, el.distributionLegend, range.rows, range.total);
     renderRanking(range);
   }
 

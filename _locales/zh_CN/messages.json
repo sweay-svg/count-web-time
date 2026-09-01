@@ -71,6 +71,18 @@
   "trend30": {
     "message": "近 30 天趋势"
   },
+  "chartEmpty": {
+    "message": "该区间暂无活动"
+  },
+  "distributionTitle": {
+    "message": "网站分布"
+  },
+  "distOther": {
+    "message": "其他"
+  },
+  "distSites": {
+    "message": "网站"
+  },
   "websites": {
     "message": "网站列表"
   },
