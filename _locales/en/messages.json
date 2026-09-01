@@ -136,5 +136,170 @@
   },
   "openDetailTitle": {
     "message": "View details"
+  },
+  "settingsTitle": {
+    "message": "Settings"
+  },
+  "ariaSettings": {
+    "message": "Settings"
+  },
+  "trackingSection": {
+    "message": "Tracking"
+  },
+  "idleTimeout": {
+    "message": "Idle timeout"
+  },
+  "idleHint": {
+    "message": "Pause timing after this much inactivity"
+  },
+  "idle30": {
+    "message": "30 seconds"
+  },
+  "idle60": {
+    "message": "60 seconds"
+  },
+  "idle120": {
+    "message": "2 minutes"
+  },
+  "idle300": {
+    "message": "5 minutes"
+  },
+  "privacySection": {
+    "message": "Privacy"
+  },
+  "privacyLocal": {
+    "message": "Your data stays on this device."
+  },
+  "privacyNoAccount": {
+    "message": "No account required."
+  },
+  "privacyNoCloud": {
+    "message": "No analytics. No cloud sync."
+  },
+  "autoSaved": {
+    "message": "Changes save automatically"
+  },
+  "dataSection": {
+    "message": "Data"
+  },
+  "clearToday": {
+    "message": "Clear today's data"
+  },
+  "clearTodayHint": {
+    "message": "Delete all browsing stats for today"
+  },
+  "clearBtn": {
+    "message": "Clear"
+  },
+  "clearAll": {
+    "message": "Clear all data"
+  },
+  "clearAllHint": {
+    "message": "Delete all saved browsing stats"
+  },
+  "clearAllBtn": {
+    "message": "Clear all"
+  },
+  "clearTodayTitle": {
+    "message": "Clear today's data?"
+  },
+  "clearTodayBody": {
+    "message": "This will delete all of today's browsing stats. This cannot be undone."
+  },
+  "clearAllTitle": {
+    "message": "Clear all data?"
+  },
+  "clearAllBody": {
+    "message": "This will delete all saved browsing stats. This cannot be undone."
+  },
+  "clearAllTitle2": {
+    "message": "Confirm again"
+  },
+  "clearAllBody2": {
+    "message": "Are you sure you want to permanently clear all data?"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "done": {
+    "message": "Cleared"
+  },
+  "exportData": {
+    "message": "Export data"
+  },
+  "exportHint": {
+    "message": "Download a JSON backup of your stats"
+  },
+  "exportBtn": {
+    "message": "Export"
+  },
+  "doneExport": {
+    "message": "Exported"
+  },
+  "importData": {
+    "message": "Import data"
+  },
+  "importHint": {
+    "message": "Restore stats from a JSON backup"
+  },
+  "importBtn": {
+    "message": "Import"
+  },
+  "doneImport": {
+    "message": "Imported"
+  },
+  "ok": {
+    "message": "OK"
+  },
+  "invalidFileTitle": {
+    "message": "Could not read file"
+  },
+  "invalidFileBody": {
+    "message": "The selected file is not valid JSON. Please choose a TimeTrack backup."
+  },
+  "invalidBackupTitle": {
+    "message": "Not a valid backup"
+  },
+  "invalidBackupBody": {
+    "message": "This file does not contain TimeTrack stats and cannot be imported."
+  },
+  "importTitle": {
+    "message": "Import data?"
+  },
+  "importBody": {
+    "message": "Importing will overwrite all current stats. This cannot be undone."
+  },
+  "importFailTitle": {
+    "message": "Import failed"
+  },
+  "importFailBody": {
+    "message": "The backup could not be imported. Please check the file and try again."
+  },
+  "appearanceSection": {
+    "message": "Appearance"
+  },
+  "theme": {
+    "message": "Theme"
+  },
+  "themeSystem": {
+    "message": "System"
+  },
+  "themeLight": {
+    "message": "Light"
+  },
+  "themeDark": {
+    "message": "Dark"
+  },
+  "trackMedia": {
+    "message": "Track media playback"
+  },
+  "trackMediaHint": {
+    "message": "Keep timing while audio is playing"
+  },
+  "trackIncognito": {
+    "message": "Track incognito windows"
+  },
+  "trackIncognitoHint": {
+    "message": "Also count private browsing windows (requires access to incognito in Chrome)"
   }
 }

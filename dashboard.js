@@ -3,6 +3,7 @@
 
 import { formatDuration, dateKey, shiftDateKey } from './utils.js';
 import { t, isZh, uiDate, UI_LOCALE, applyI18n } from './i18n.js';
+import { applyTheme } from './theme.js';
 
 const REFRESH_MS = 3000;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -37,6 +38,7 @@ const el = {
   emptyState: document.getElementById('emptyState'),
   errorState: document.getElementById('errorState'),
   backBtn: document.getElementById('backBtn'),
+  openSettings: document.getElementById('openSettings'),
   detailFav: document.getElementById('detailFav'),
   detailDomain: document.getElementById('detailDomain'),
   detailStatus: document.getElementById('detailStatus'),
@@ -417,8 +419,17 @@ el.sortBy.addEventListener('change', () => {
 
 el.backBtn.addEventListener('click', showList);
 
+// 打开独立设置页（新标签页）
+el.openSettings.addEventListener('click', () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') });
+});
+
 // 侧边栏不可见时暂停轮询，可见时立即刷新
 applyI18n();
+// 应用主题（settings.theme）
+sendMessage({ type: 'GET_SETTINGS' }).then((resp) => {
+  if (resp?.settings) applyTheme(resp.settings.theme);
+});
 let timer = setInterval(() => {
   if (!document.hidden) refresh();
 }, REFRESH_MS);

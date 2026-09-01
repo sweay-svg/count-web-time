@@ -136,5 +136,170 @@
   },
   "openDetailTitle": {
     "message": "查看详情"
+  },
+  "settingsTitle": {
+    "message": "设置"
+  },
+  "ariaSettings": {
+    "message": "设置"
+  },
+  "trackingSection": {
+    "message": "计时"
+  },
+  "idleTimeout": {
+    "message": "空闲超时"
+  },
+  "idleHint": {
+    "message": "无操作达到该时长后暂停计时"
+  },
+  "idle30": {
+    "message": "30 秒"
+  },
+  "idle60": {
+    "message": "60 秒"
+  },
+  "idle120": {
+    "message": "2 分钟"
+  },
+  "idle300": {
+    "message": "5 分钟"
+  },
+  "privacySection": {
+    "message": "隐私"
+  },
+  "privacyLocal": {
+    "message": "你的数据仅保存在本设备。"
+  },
+  "privacyNoAccount": {
+    "message": "无需注册账号。"
+  },
+  "privacyNoCloud": {
+    "message": "无分析统计，无云同步。"
+  },
+  "autoSaved": {
+    "message": "更改会自动保存"
+  },
+  "dataSection": {
+    "message": "数据"
+  },
+  "clearToday": {
+    "message": "清除今天的数据"
+  },
+  "clearTodayHint": {
+    "message": "删除今天的全部浏览统计"
+  },
+  "clearBtn": {
+    "message": "清除"
+  },
+  "clearAll": {
+    "message": "清除全部数据"
+  },
+  "clearAllHint": {
+    "message": "删除所有已保存的浏览统计"
+  },
+  "clearAllBtn": {
+    "message": "全部清除"
+  },
+  "clearTodayTitle": {
+    "message": "清除今天的数据？"
+  },
+  "clearTodayBody": {
+    "message": "将删除今天的所有浏览统计，此操作不可恢复。"
+  },
+  "clearAllTitle": {
+    "message": "清除全部数据？"
+  },
+  "clearAllBody": {
+    "message": "将删除所有已保存的浏览统计，此操作不可恢复。"
+  },
+  "clearAllTitle2": {
+    "message": "再次确认"
+  },
+  "clearAllBody2": {
+    "message": "确定要永久清除全部数据吗？"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "done": {
+    "message": "已清除"
+  },
+  "exportData": {
+    "message": "导出数据"
+  },
+  "exportHint": {
+    "message": "下载统计数据的 JSON 备份"
+  },
+  "exportBtn": {
+    "message": "导出"
+  },
+  "doneExport": {
+    "message": "已导出"
+  },
+  "importData": {
+    "message": "导入数据"
+  },
+  "importHint": {
+    "message": "从 JSON 备份恢复统计数据"
+  },
+  "importBtn": {
+    "message": "导入"
+  },
+  "doneImport": {
+    "message": "已导入"
+  },
+  "ok": {
+    "message": "确定"
+  },
+  "invalidFileTitle": {
+    "message": "无法读取文件"
+  },
+  "invalidFileBody": {
+    "message": "所选文件不是有效的 JSON，请选择 TimeTrack 导出的备份文件。"
+  },
+  "invalidBackupTitle": {
+    "message": "不是有效的备份"
+  },
+  "invalidBackupBody": {
+    "message": "该文件不包含 TimeTrack 的统计数据，无法导入。"
+  },
+  "importTitle": {
+    "message": "导入数据？"
+  },
+  "importBody": {
+    "message": "导入将覆盖当前的所有统计数据，此操作不可恢复。"
+  },
+  "importFailTitle": {
+    "message": "导入失败"
+  },
+  "importFailBody": {
+    "message": "备份数据无法导入，请检查文件后重试。"
+  },
+  "appearanceSection": {
+    "message": "外观"
+  },
+  "theme": {
+    "message": "主题"
+  },
+  "themeSystem": {
+    "message": "跟随系统"
+  },
+  "themeLight": {
+    "message": "浅色"
+  },
+  "themeDark": {
+    "message": "深色"
+  },
+  "trackMedia": {
+    "message": "追踪媒体播放"
+  },
+  "trackMediaHint": {
+    "message": "页面有声音播放时继续计时"
+  },
+  "trackIncognito": {
+    "message": "追踪隐身窗口"
+  },
+  "trackIncognitoHint": {
+    "message": "同时统计隐身模式的浏览（需先在 Chrome 允许扩展访问隐身窗口）"
   }
 }

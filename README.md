@@ -29,7 +29,8 @@
 
 - 正常浏览即可，计时全自动。
 - 点击工具栏图标打开 popup：今日总时长、环比昨天、当前网站、Top 5 网站，每 2 秒自动刷新。
-- 点击 popup 底部的 **View detailed analytics**，在浏览器侧边栏打开完整 Dashboard，可切换 Today / 7 Days / 30 Days 并前后翻页查看历史。
+- 点击 popup 底部的 **View detailed analytics**，在浏览器侧边栏打开完整 Dashboard，可切换 Today / 7 Days / 30 Days 并前后翻页查看历史；点击排行中的任意网站进入**单站详情**（四区间汇总、平均会话、近 30 天活动图、最近会话列表），返回按钮回到列表。
+- popup 与 Dashboard 右上角的齿轮按钮打开**设置页**：空闲超时（30s/60s/2 分钟/5 分钟）、是否追踪媒体播放与隐身窗口、主题（跟随系统/浅色/深色）、数据导出/导入备份、清除今日数据 / 清除全部数据（危险操作有确认弹窗）。
 - 界面语言自动跟随浏览器：内置**简体中文**与 English，中文系统显示中文（时长显示为「1小时42分」、日期为「8月31日」），无需手动切换。
 
 ## 计时规则
@@ -41,7 +42,7 @@
 | `www.example.com` 与 `example.com` | 合并为 `example.com` |
 | `mail.google.com` 与 `drive.google.com` | **保持独立**，不做强制合并 |
 | 浏览器窗口失焦 / 最小化 | 暂停计时，重新聚焦后续计 |
-| 60 秒无键鼠操作（idle） | 自动暂停，重新操作后续计 |
+| 超过空闲阈值（默认 60 秒，可在设置页改为 30 秒/2 分钟/5 分钟） | 自动暂停，重新操作后续计 |
 | 刷新页面 | 计时连续，不产生异常累计 |
 | 跨午夜仍在使用 | 按本地 0 点拆分到两天 |
 | `chrome://`、`edge://`、`about:`、`file://` 等特殊页面 | 不统计，静默处理 |
@@ -71,7 +72,7 @@ chrome.storage.local.get(null, (d) => console.log(d));
 chrome.storage.local.clear();
 ```
 
-（可视化的设置/导入导出页面属于后续阶段。）
+（数据可视化操作：在设置页可导出 JSON 备份、导入恢复、清除今日或全部数据。）
 
 ## 权限说明（最小权限原则）
 
@@ -79,7 +80,7 @@ chrome.storage.local.clear();
 |---|---|
 | `storage` | 统计数据保存在 `chrome.storage.local`，纯本地 |
 | `tabs` | 获取当前活动标签页的 URL 以识别 domain，并监听切换/导航/关闭 |
-| `idle` | 检测 60 秒无操作，自动暂停 |
+| `idle` | 按设置的空闲阈值（默认 60 秒）检测无操作，自动暂停 |
 | `alarms` | 30 秒周期兜底持久化 |
 | `favicon` | 通过浏览器本地的 `chrome://favicon` 显示网站图标，不发起网络请求，失败时回退为首字母占位 |
 | `sidePanel` | 在侧边栏打开完整 Dashboard |
@@ -102,14 +103,16 @@ count-web-time/
 ├── storage.js           # chrome.storage.local 数据层
 ├── utils.js             # 域名归一化 / 日期 / 时长格式化（支持中英文）
 ├── i18n.js              # 界面语言辅助（跟随浏览器语言）
+├── theme.js             # 主题应用（system/light/dark → <html data-theme>）
 ├── _locales/            # 语言包：zh_CN（简体中文）/ en（English）
 ├── popup.html/js/.css   # 工具栏弹窗（今日概览）
-└── dashboard.html/js/.css # 侧边栏 Dashboard（区间统计与趋势）
+├── dashboard.html/js/.css # 侧边栏 Dashboard（区间统计、趋势、单站详情）
+└── settings.html/js/.css  # 设置页（计时/主题/数据/隐私）
 ```
 
 ## 已知限制
 
-- 不统计特殊页面（设计如此）与隐身窗口（后续阶段支持）。
+- 不统计特殊页面（设计如此）。隐身窗口默认不统计，可在设置页开启「追踪隐身窗口」——但需先在 `chrome://extensions` 的扩展详情里勾选「允许在隐身模式下运行」，否则 Chrome 不会把隐身窗口暴露给扩展。
+- 「追踪媒体播放」以页面是否发声（`audible`）判定：有声音播放时失焦/空闲不暂停；静音播放的视频不在此列。
 - 正式打包上架后 Chrome 把 alarm 最小周期限制为 1 分钟（开发者模式为 30 秒）；只影响兜底频率，不影响准确性，关键切换始终即时保存。
 - 网站图标直接读浏览器本地 favicon 缓存，浏览器无缓存时回退为首字母占位。
-- 网站详情页、设置页、导入导出、深色模式属于后续阶段。

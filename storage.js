@@ -7,7 +7,7 @@
 //   persist() 只把发生变化的 key 写回（SKILL 第 27 节：不要每次全量写 storage）。
 //
 // 数据模型（SKILL 第 3 节，按 domain 聚合，不保存完整 URL）：
-//   settings: { idleThresholdSeconds: 60 }
+//   settings: { idleThresholdSeconds, trackMediaPlayback, trackIncognito, theme }
 //   stats[domain] = {
 //     domain, totalTime(ms), visitCount(全周期), lastVisited,
 //     daily: { "YYYY-MM-DD": { ms: number, visits: number } },
@@ -17,9 +17,41 @@
 
 import { shiftDateKey } from './utils.js';
 
+// 空闲超时可选值（秒）；chrome.idle.setDetectionInterval 最小 15s，这里给四档常用值。
+export const IDLE_OPTIONS = Object.freeze([30, 60, 120, 300]);
+// 主题可选值（第四阶段 Appearance）。
+export const THEME_OPTIONS = Object.freeze(['system', 'light', 'dark']);
+
 export const DEFAULT_SETTINGS = Object.freeze({
-  idleThresholdSeconds: 60
+  idleThresholdSeconds: 60,
+  trackMediaPlayback: true,
+  trackIncognito: false,
+  theme: 'system'
 });
+
+/**
+ * 清洗设置补丁：只保留已知且合法的字段，丢弃未知 key 与非法值。
+ * 供 updateSettings 与导入数据复用，防止脏设置进入存储。
+ * @param {object} patch
+ * @returns {object} 只含合法字段的干净补丁（可能为空对象）
+ */
+export function normalizeSettings(patch) {
+  const out = {};
+  if (!patch || typeof patch !== 'object') return out;
+  if (IDLE_OPTIONS.includes(patch.idleThresholdSeconds)) {
+    out.idleThresholdSeconds = patch.idleThresholdSeconds;
+  }
+  if (typeof patch.trackMediaPlayback === 'boolean') {
+    out.trackMediaPlayback = patch.trackMediaPlayback;
+  }
+  if (typeof patch.trackIncognito === 'boolean') {
+    out.trackIncognito = patch.trackIncognito;
+  }
+  if (THEME_OPTIONS.includes(patch.theme)) {
+    out.theme = patch.theme;
+  }
+  return out;
+}
 
 // 每个 domain 保留的最近会话条数（够展示"最近"，又不让数据无限膨胀）。
 const MAX_SESSIONS = 30;
@@ -72,8 +104,10 @@ export function createStore(backend) {
   /** 从后端载入全部数据到内存缓存，service worker 启动时调用一次。 */
   async function init() {
     const stored = await backend.get(STORAGE_KEYS);
+    // 合并默认值后再整体清洗一次：旧/非法字段回退默认，未知字段剔除。
+    const settings = { ...DEFAULT_SETTINGS, ...normalizeSettings({ ...DEFAULT_SETTINGS, ...(stored.settings || {}) }) };
     cache = {
-      settings: { ...DEFAULT_SETTINGS, ...(stored.settings || {}) },
+      settings,
       stats: stored.stats || {},
       current: stored.current || null
     };
@@ -90,8 +124,10 @@ export function createStore(backend) {
     return ensureLoaded().settings;
   }
 
+  /** 合并合法设置字段；非法值/未知 key 被 normalizeSettings 过滤。 */
   function updateSettings(patch) {
-    Object.assign(ensureLoaded().settings, patch);
+    const clean = normalizeSettings(patch);
+    Object.assign(ensureLoaded().settings, clean);
     dirty.add('settings');
   }
 
@@ -202,6 +238,76 @@ export function createStore(backend) {
     };
   }
 
+  /** 某本地日期 0 点时间戳（YYYY-MM-DD → ms）。 */
+  function dayStartMs(dateKeyStr) {
+    const [y, m, d] = dateKeyStr.split('-').map(Number);
+    return new Date(y, m - 1, d).getTime();
+  }
+
+  /**
+   * 清除某一天（本地日期）的全部统计数据：daily 记录、当天结束的会话；
+   * 重算 totalTime / visitCount，并清理被清空的空壳站点。
+   * @param {string} date YYYY-MM-DD
+   */
+  function clearDay(date) {
+    const { stats } = ensureLoaded();
+    const start = dayStartMs(date);
+    const end = dayStartMs(shiftDateKey(date, 1));
+
+    for (const domain of Object.keys(stats)) {
+      const site = stats[domain];
+      const cell = readCell(site.daily[date]);
+      if (cell.ms > 0 || cell.visits > 0) {
+        site.totalTime -= cell.ms;
+        site.visitCount -= cell.visits;
+        delete site.daily[date];
+      }
+      if (Array.isArray(site.sessions) && site.sessions.length) {
+        const kept = site.sessions.filter((s) => s.end < start || s.end >= end);
+        if (kept.length !== site.sessions.length) site.sessions = kept;
+      }
+      // 站点已无任何数据 → 移除空壳（避免脏数据留在 stats）
+      if (site.totalTime <= 0 && site.visitCount <= 0 && (site.sessions?.length ?? 0) === 0) {
+        delete stats[domain];
+      }
+    }
+    dirty.add('stats');
+  }
+
+  /** 清除全部统计（保留 settings；current 由调用方 tracker.reset 处理）。 */
+  function clearAll() {
+    ensureLoaded().stats = {};
+    dirty.add('stats');
+  }
+
+  /**
+   * 从备份导入统计（覆盖当前 stats）。做结构校验 + 复用迁移清洗 + 站点字段归一，
+   * 兼容旧格式备份（daily 为 number / 缺字段）。settings 与 current 不受影响。
+   * @param {unknown} raw 期望为 { [domain]: WebsiteStat }
+   * @returns {boolean} 是否成功导入
+   */
+  function importStats(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+    const stats = structuredClone(raw);
+    migrateDaily(stats);
+    for (const [domain, site] of Object.entries(stats)) {
+      if (!site || typeof site !== 'object') {
+        delete stats[domain];
+        continue;
+      }
+      site.domain = (typeof site.domain === 'string' && site.domain) ? site.domain : domain;
+      site.totalTime = Number.isFinite(site.totalTime) ? site.totalTime : 0;
+      site.visitCount = Number.isFinite(site.visitCount) ? site.visitCount : 0;
+      site.lastVisited = Number.isFinite(site.lastVisited) ? site.lastVisited : 0;
+      if (!site.daily || typeof site.daily !== 'object' || Array.isArray(site.daily)) site.daily = {};
+      if (!Array.isArray(site.sessions)) site.sessions = [];
+      else if (site.sessions.length > MAX_SESSIONS) site.sessions = site.sessions.slice(-MAX_SESSIONS);
+    }
+    ensureLoaded().stats = stats;
+    dirty.add('stats');
+    return true;
+  }
+
   /** 写入/清除当前未闭合活跃段。 */
   function setCurrent(segment) {
     ensureLoaded().current = segment ?? null;
@@ -289,6 +395,9 @@ export function createStore(backend) {
     persist,
     getDay,
     getRange,
-    getDetail
+    getDetail,
+    clearDay,
+    clearAll,
+    importStats
   };
 }

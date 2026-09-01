@@ -3,6 +3,7 @@
 
 import { formatDuration, percentChange } from './utils.js';
 import { t, isZh, uiDate, UI_LOCALE, applyI18n } from './i18n.js';
+import { applyTheme } from './theme.js';
 
 const REFRESH_MS = 2000;
 const TOP_N = 5;
@@ -107,7 +108,8 @@ async function render() {
   }
 
   el.errorState.hidden = true;
-  const { today, yesterdayTotal, current } = resp;
+  const { today, yesterdayTotal, current, settings } = resp;
+  applyTheme(settings?.theme);
   const hasData = today.total > 0;
 
   el.totalTime.textContent = formatDuration(today.total, { locale: UI_LOCALE });
@@ -136,6 +138,11 @@ function init() {
     const win = await chrome.windows.getCurrent();
     await chrome.sidePanel.open({ windowId: win.id });
     window.close();
+  });
+
+  // 打开独立设置页（新标签页）
+  document.getElementById('openSettings').addEventListener('click', () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') });
   });
 }
 

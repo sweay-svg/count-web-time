@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>TimeTrack Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <main class="st-wrap">
+    <header class="st-header">
+      <div class="st-brand">TimeTrack</div>
+      <h1 class="st-title" data-i18n="settingsTitle">Settings</h1>
+    </header>
+
+    <!-- Tracking -->
+    <section class="st-group">
+      <h2 class="st-group-title" data-i18n="trackingSection">Tracking</h2>
+      <div class="card st-card">
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="idleTimeout">Idle timeout</div>
+            <div class="st-row-hint" data-i18n="idleHint">Pause timing after this much inactivity</div>
+          </div>
+          <select id="idleTimeout" class="st-select" aria-label="Idle timeout" data-i18n-aria-label="idleTimeout">
+            <option value="30" data-i18n="idle30">30 seconds</option>
+            <option value="60" data-i18n="idle60">60 seconds</option>
+            <option value="120" data-i18n="idle120">2 minutes</option>
+            <option value="300" data-i18n="idle300">5 minutes</option>
+          </select>
+        </div>
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="trackMedia">Track media playback</div>
+            <div class="st-row-hint" data-i18n="trackMediaHint">Keep timing while audio is playing</div>
+          </div>
+          <button type="button" class="st-switch is-on" id="trackMedia" role="switch" aria-checked="true">
+            <span class="st-switch-knob"></span>
+          </button>
+        </div>
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="trackIncognito">Track incognito windows</div>
+            <div class="st-row-hint" data-i18n="trackIncognitoHint">Also count private browsing windows</div>
+          </div>
+          <button type="button" class="st-switch" id="trackIncognito" role="switch" aria-checked="false">
+            <span class="st-switch-knob"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Appearance -->
+    <section class="st-group">
+      <h2 class="st-group-title" data-i18n="appearanceSection">Appearance</h2>
+      <div class="card st-card">
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="theme">Theme</div>
+          </div>
+          <div class="st-seg" id="themeSeg" role="radiogroup">
+            <button type="button" class="st-seg-btn" data-theme-val="system" role="radio" aria-checked="true" data-i18n="themeSystem">System</button>
+            <button type="button" class="st-seg-btn" data-theme-val="light" role="radio" aria-checked="false" data-i18n="themeLight">Light</button>
+            <button type="button" class="st-seg-btn" data-theme-val="dark" role="radio" aria-checked="false" data-i18n="themeDark">Dark</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data -->
+    <section class="st-group">
+      <h2 class="st-group-title" data-i18n="dataSection">Data</h2>
+      <div class="card st-card">
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="clearToday">Clear today's data</div>
+            <div class="st-row-hint" data-i18n="clearTodayHint">Delete all browsing stats for today</div>
+          </div>
+          <button type="button" class="st-btn" id="clearToday" data-i18n="clearBtn">Clear</button>
+        </div>
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="clearAll">Clear all data</div>
+            <div class="st-row-hint" data-i18n="clearAllHint">Delete all saved browsing stats</div>
+          </div>
+          <button type="button" class="st-btn st-btn-danger" id="clearAll" data-i18n="clearAllBtn">Clear all</button>
+        </div>
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="exportData">Export data</div>
+            <div class="st-row-hint" data-i18n="exportHint">Download a JSON backup of your stats</div>
+          </div>
+          <button type="button" class="st-btn" id="exportData" data-i18n="exportBtn">Export</button>
+        </div>
+        <div class="st-row">
+          <div class="st-row-text">
+            <div class="st-row-label" data-i18n="importData">Import data</div>
+            <div class="st-row-hint" data-i18n="importHint">Restore stats from a JSON backup</div>
+          </div>
+          <button type="button" class="st-btn" id="importData" data-i18n="importBtn">Import</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy -->
+    <section class="st-group">
+      <h2 class="st-group-title" data-i18n="privacySection">Privacy</h2>
+      <div class="card st-card st-privacy">
+        <p data-i18n="privacyLocal">Your data stays on this device.</p>
+        <p data-i18n="privacyNoAccount">No account required.</p>
+        <p data-i18n="privacyNoCloud">No analytics. No cloud sync.</p>
+      </div>
+    </section>
+
+    <p class="st-autosave" data-i18n="autoSaved">Changes save automatically</p>
+  </main>
+
+  <!-- 统一确认弹窗（危险操作专用，不用浏览器 alert） -->
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <p class="modal-body" id="modalBody"></p>
+      <div class="modal-actions">
+        <button type="button" class="st-btn" id="modalCancel" data-i18n="cancel">Cancel</button>
+        <button type="button" class="st-btn st-btn-danger" id="modalConfirm"></button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="settings.js"></script>
+</body>
+</html>
