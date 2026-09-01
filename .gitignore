@@ -5,6 +5,11 @@
 # 需求与开发过程文档
 /SKILL.md
 /CLAUDE.md
+/AGENT.md
+
+# 开发日志与项目文档（本地保留，不上传 GitHub）
+/dev-log/
+/docs/
 
 # 依赖与系统、编辑器杂项
 node_modules/
