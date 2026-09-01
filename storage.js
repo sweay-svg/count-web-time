@@ -29,6 +29,13 @@ export const DEFAULT_SETTINGS = Object.freeze({
   theme: 'system'
 });
 
+// 导入备份的规模上限（防恶意/损坏备份撑爆 storage.local 配额，无 unlimitedStorage）：
+// 站点数上限、daily 单元格总数上限（站点数 × 天数）。
+export const IMPORT_LIMITS = Object.freeze({
+  MAX_SITES: 5000,
+  MAX_CELLS: 200000
+});
+
 /**
  * 清洗设置补丁：只保留已知且合法的字段，丢弃未知 key 与非法值。
  * 供 updateSettings 与导入数据复用，防止脏设置进入存储。
@@ -288,6 +295,16 @@ export function createStore(backend) {
    */
   function importStats(raw) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+    // 规模预检（在深拷贝前）：防止恶意/损坏备份撑爆 chrome.storage.local 配额
+    const sites = Object.keys(raw);
+    if (sites.length > IMPORT_LIMITS.MAX_SITES) return false;
+    let cells = 0;
+    for (const site of Object.values(raw)) {
+      if (!site || typeof site !== 'object') continue;
+      const d = site.daily;
+      if (d && typeof d === 'object' && !Array.isArray(d)) cells += Object.keys(d).length;
+      if (cells > IMPORT_LIMITS.MAX_CELLS) return false;
+    }
     const stats = structuredClone(raw);
     migrateDaily(stats);
     for (const [domain, site] of Object.entries(stats)) {
@@ -296,6 +313,7 @@ export function createStore(backend) {
         continue;
       }
       site.domain = (typeof site.domain === 'string' && site.domain) ? site.domain : domain;
+      if (site.domain.length > 255) delete stats[domain]; // 异常超长域名直接剔除
       site.totalTime = Number.isFinite(site.totalTime) ? site.totalTime : 0;
       site.visitCount = Number.isFinite(site.visitCount) ? site.visitCount : 0;
       site.lastVisited = Number.isFinite(site.lastVisited) ? site.lastVisited : 0;

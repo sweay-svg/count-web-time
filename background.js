@@ -24,12 +24,13 @@ const ready = (async () => {
   const existing = await chrome.alarms.get(CHECKPOINT_ALARM);
   if (!existing) await chrome.alarms.create(CHECKPOINT_ALARM, { periodInMinutes: CHECKPOINT_PERIOD_MIN });
 })();
-ready.catch((err) => console.error('[TimeTrack] boot failed:', err));
+ready.catch((err) => console.error('[TimeTrack] boot failed:', err?.message ?? err));
 
 // 包装事件监听：错误打日志而不是静默吞掉，也不让 rejection 中断 SW。
+// 只打 err.message（不序列化整个错误对象），避免潜在 URL 等敏感信息进入日志。
 function safe(label, fn) {
   return (...args) => {
-    fn(...args).catch((err) => console.error(`[TimeTrack] ${label}:`, err));
+    fn(...args).catch((err) => console.error(`[TimeTrack] ${label}:`, err?.message ?? err));
   };
 }
 
@@ -238,7 +239,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       sendResponse({ settings });
     })
     .catch((err) => {
-      console.error(`[TimeTrack] ${type}:`, err);
+      console.error(`[TimeTrack] ${type}:`, err?.message ?? err);
       sendResponse({ error: 'LOAD_FAILED' });
     });
   return true; // 异步 sendResponse

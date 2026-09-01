@@ -6,6 +6,9 @@ import { applyI18n, t } from './i18n.js';
 import { dateKey } from './utils.js';
 import { applyTheme } from './theme.js';
 
+// 导入备份文件大小上限（8MB）：与 storage 侧 IMPORT_LIMITS 配套，防超大文件。
+const IMPORT_FILE_MAX_BYTES = 8 * 1024 * 1024;
+
 const el = {
   idle: document.getElementById('idleTimeout'),
   themeSeg: document.getElementById('themeSeg'),
@@ -202,6 +205,12 @@ el.importFile.addEventListener('change', async () => {
   const file = el.importFile.files?.[0];
   el.importFile.value = ''; // 允许再次选择同一文件
   if (!file) return;
+
+  // 限制备份文件大小，避免超大文件占用内存 / 解析卡顿 / 撑爆 storage
+  if (file.size > IMPORT_FILE_MAX_BYTES) {
+    await notifyDialog({ title: t('importFailTitle'), body: t('importFailBody') });
+    return;
+  }
 
   let payload;
   try {
