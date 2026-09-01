@@ -1,47 +1,5 @@
-/* TimeTrack popup — minimal / calm / data-driven（SKILL 第 10-15 节） */
-
-:root {
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --text: #0f172a;
-  --text-2: #64748b;
-  --text-3: #94a3b8;
-  --border: #e2e8f0;
-  --track: #f1f5f9;
-  --primary: #6366f1;
-  --primary-soft: #c7d2fe;
-  --success: #22c55e;
-  --radius: 12px;
-}
-
-/* 深色模式（SKILL 第 19 节：给定配色，不简单反转全部颜色） */
-:root[data-theme="dark"] {
-  --bg: #0f172a;
-  --card: #1e293b;
-  --text: #f8fafc;
-  --text-2: #94a3b8;
-  --text-3: #64748b;
-  --border: #334155;
-  --track: #26324a;
-  --primary: #818cf8;
-  --primary-soft: #3730a3;
-  --success: #22c55e;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="system"],
-  :root:not([data-theme]) {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --text: #f8fafc;
-    --text-2: #94a3b8;
-    --text-3: #64748b;
-    --border: #334155;
-    --track: #26324a;
-    --primary: #818cf8;
-    --primary-soft: #3730a3;
-    --success: #22c55e;
-  }
-}
+/* TimeTrack popup — minimal / calm / data-driven（SKILL 第 10-15 节）
+   设计令牌（颜色 / 圆角 / 深浅主题）见共享 tokens.css */
 
 * { box-sizing: border-box; }
 
@@ -70,9 +28,19 @@ body {
 }
 
 .pp-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 15px;
   font-weight: 650;
   letter-spacing: -0.01em;
+}
+
+.brand-logo {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  display: block;
 }
 
 .pp-header-right {

@@ -1,12 +1,13 @@
 // dashboard.js — Side Panel：Today / 7 Days / 30 Days 概览 + 单网站详情（Website Detail）。
 // 所有动态节点用 DOM API / createElementNS 构建，不用 innerHTML 拼接数据。
 
-import { formatDuration, dateKey, shiftDateKey } from './utils.js';
+import { formatDuration, dateKey, shiftDateKey, makeDeltaLabel, sendMessage } from './utils.js';
 import { t, isZh, uiDate, UI_LOCALE, applyI18n } from './i18n.js';
 import { applyTheme } from './theme.js';
 import { renderBarChart, renderDonut, renderLineChart } from './charts.js';
 
 const REFRESH_MS = 3000;
+const deltaLabel = makeDeltaLabel(t);
 
 const state = {
   view: 'list',          // 'list' | 'detail'
@@ -26,6 +27,7 @@ const el = {
   rangeLabel: document.getElementById('rangeLabel'),
   currentSite: document.getElementById('currentSite'),
   cTotal: document.getElementById('cTotal'),
+  cTotalDelta: document.getElementById('cTotalDelta'),
   cSites: document.getElementById('cSites'),
   cAvg: document.getElementById('cAvg'),
   cMost: document.getElementById('cMost'),
@@ -59,17 +61,6 @@ const el = {
   sessionList: document.getElementById('sessionList'),
   sessionsEmpty: document.getElementById('sessionsEmpty')
 };
-
-function sendMessage(message) {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(message, (response) => {
-      if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
-      else resolve(response);
-    });
-  });
-}
-
-// ---------- 日期展示 ----------
 
 function parseKey(key) {
   const [y, m, d] = key.split('-').map(Number);
@@ -250,9 +241,11 @@ async function refreshDetail() {
   const resp = await sendMessage({ type: 'GET_DETAIL', domain: state.activeDomain });
   if (!resp || resp.error || !resp.detail) {
     el.errorState.hidden = false;
+    el.detailView.hidden = true;
     return;
   }
   el.errorState.hidden = true;
+  el.detailView.hidden = false;
   state.today = resp.today;
   renderDetail(resp.detail, resp.current);
 }
@@ -283,14 +276,17 @@ async function refreshList() {
   const resp = await sendMessage({ type: 'GET_RANGE', days: state.days, endDate: state.endDate });
   if (!resp || resp.error) {
     el.errorState.hidden = false;
+    el.listView.hidden = true; // 错误时不显示占位/残留内容，避免与错误卡片并存
     return;
   }
   el.errorState.hidden = true;
+  el.listView.hidden = false;
   state.today = resp.today;
-  const { range, current } = resp;
+  const { range, current, prevDayTotal } = resp;
 
   el.rangeLabel.textContent = buildRangeLabel(range);
   el.cTotal.textContent = formatDuration(range.total, { locale: UI_LOCALE });
+  el.cTotalDelta.textContent = state.days === 1 ? deltaLabel(range.total, prevDayTotal ?? 0) : '';
   el.cSites.textContent = String(range.activeSites);
   el.cAvg.textContent = formatDuration(range.averageDaily, { locale: UI_LOCALE });
   el.cMost.textContent = range.mostUsed ?? '–';

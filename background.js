@@ -173,7 +173,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         sendResponse({
           today: todayKey,
           current: tracker.getActiveSegment(),
-          range: tracker.liveRange(endDate, days, at)
+          range: tracker.liveRange(endDate, days, at),
+          prevDayTotal: store.getDay(shiftDateKey(endDate, -1)).total
         });
         return;
       }

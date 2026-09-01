@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>TimeTrack Dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
   <header class="db-header">
-    <div class="db-brand">TimeTrack</div>
+    <div class="db-brand"><img class="brand-logo" src="icons/icon.svg" alt="" aria-hidden="true">TimeTrack</div>
     <div class="db-segments" id="rangeTabs" role="tablist">
       <button type="button" class="seg is-active" data-days="1" role="tab" data-i18n="rangeToday">Today</button>
       <button type="button" class="seg" data-days="7" role="tab" data-i18n="range7">7 Days</button>
@@ -36,6 +37,7 @@
         <div class="card stat-card">
           <div class="stat-label" data-i18n="totalTime">Total time</div>
           <div class="stat-value" id="cTotal">–</div>
+          <div class="stat-sub" id="cTotalDelta"></div>
         </div>
         <div class="card stat-card">
           <div class="stat-label" data-i18n="activeSites">Active sites</div>

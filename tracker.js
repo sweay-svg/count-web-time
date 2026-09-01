@@ -26,11 +26,16 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     return pieces;
   }
 
+  /** 当前活跃段 [startedAt, at) 按本地天切分（settle/checkpoint/live* 共用）。 */
+  function currentPieces(at) {
+    return splitDurationByLocalDay(seg.startedAt, at);
+  }
+
   /** 结算当前活跃段：[startedAt, at) 按本地天拆分后累加，并记录一次会话；不主动改 current。 */
   function settle(at) {
     if (!seg) return;
     const pieces = stampVisit(
-      splitDurationByLocalDay(seg.startedAt, at),
+      currentPieces(at),
       seg.isNewVisit
     );
     store.addTime(seg.domain, pieces, at);
@@ -111,7 +116,7 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     const current = seg;
     // 消费当前段的 visit 标记：新访问在首次结转时入账，后续结转不再重复。
     const pieces = stampVisit(
-      splitDurationByLocalDay(current.startedAt, at),
+      currentPieces(at),
       current.isNewVisit
     );
     store.addTime(current.domain, pieces, at);
@@ -153,7 +158,7 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
   function liveDay(date = dateKey(new Date(nowFn())), at = nowFn()) {
     const day = store.getDay(date);
     if (seg) {
-      for (const piece of splitDurationByLocalDay(seg.startedAt, at)) {
+      for (const piece of currentPieces(at)) {
         if (piece.date !== date) continue;
         const row = day.rows.find((r) => r.domain === seg.domain);
         if (row) row.ms += piece.ms;
@@ -174,7 +179,7 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     if (!seg) return range;
 
     const indexByDate = new Map(range.keys.map((date, i) => [date, i]));
-    for (const piece of splitDurationByLocalDay(seg.startedAt, at)) {
+    for (const piece of currentPieces(at)) {
       const dayIndex = indexByDate.get(piece.date);
       if (dayIndex === undefined) continue;
       let row = range.rows.find((r) => r.domain === seg.domain);
@@ -201,7 +206,7 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     const detail = store.getDetail(domain, todayKey);
     if (!detail || !seg || seg.domain !== domain) return detail;
 
-    for (const piece of splitDurationByLocalDay(seg.startedAt, at)) {
+    for (const piece of currentPieces(at)) {
       if (piece.date === todayKey) detail.today.ms += piece.ms;
       if (piece.date >= detail.last30Start) {
         detail.last30.ms += piece.ms;

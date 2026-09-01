@@ -163,3 +163,33 @@ export function percentChange(current, previous) {
   if (previous <= 0) return current > 0 ? null : 0;
   return Math.round(((current - previous) / previous) * 100);
 }
+
+/**
+ * 生成"较昨日"对比文案函数（popup 与 dashboard 共用，消除重复）。
+ * 依赖 i18n key：deltaUp / deltaDown / deltaSame / deltaFirst。
+ * @param {(key: string, ...subs: string[]) => string} t 翻译函数
+ * @returns {(total: number, yesterdayTotal: number) => string}
+ */
+export function makeDeltaLabel(t) {
+  return (total, yesterdayTotal) => {
+    const pct = percentChange(total, yesterdayTotal);
+    if (pct === null) return total > 0 ? t('deltaFirst') : '';
+    if (pct === 0) return t('deltaSame');
+    return t(pct > 0 ? 'deltaUp' : 'deltaDown', String(Math.abs(pct)));
+  };
+}
+
+/**
+ * 向 background 发送消息并 Promise 化（popup / dashboard / settings 共用）。
+ * 处理 chrome.runtime.lastError，出错时解析为 { error } 而非 reject。
+ * @param {object} message
+ * @returns {Promise<object|undefined>}
+ */
+export function sendMessage(message) {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage(message, (response) => {
+      if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
+      else resolve(response);
+    });
+  });
+}

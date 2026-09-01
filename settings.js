@@ -3,7 +3,7 @@
 // 危险操作统一走 Modal 确认（不用浏览器 alert()）。
 
 import { applyI18n, t } from './i18n.js';
-import { dateKey } from './utils.js';
+import { dateKey, sendMessage } from './utils.js';
 import { applyTheme } from './theme.js';
 
 // 导入备份文件大小上限（8MB）：与 storage 侧 IMPORT_LIMITS 配套，防超大文件。
@@ -25,15 +25,6 @@ const el = {
   modalCancel: document.getElementById('modalCancel'),
   modalConfirm: document.getElementById('modalConfirm')
 };
-
-function sendMessage(message) {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(message, (response) => {
-      if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
-      else resolve(response);
-    });
-  });
-}
 
 // ---------- 统一弹窗（确认 / 提示共用同一 Modal） ----------
 

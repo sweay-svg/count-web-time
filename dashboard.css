@@ -1,47 +1,5 @@
-/* TimeTrack dashboard（Side Panel）— 与 popup 共用同一套克制的设计语言 */
-
-:root {
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --text: #0f172a;
-  --text-2: #64748b;
-  --text-3: #94a3b8;
-  --border: #e2e8f0;
-  --track: #f1f5f9;
-  --primary: #6366f1;
-  --primary-soft: #c7d2fe;
-  --success: #22c55e;
-  --radius: 12px;
-}
-
-/* 深色模式（SKILL 第 19 节：给定配色，不简单反转全部颜色） */
-:root[data-theme="dark"] {
-  --bg: #0f172a;
-  --card: #1e293b;
-  --text: #f8fafc;
-  --text-2: #94a3b8;
-  --text-3: #64748b;
-  --border: #334155;
-  --track: #26324a;
-  --primary: #818cf8;
-  --primary-soft: #3730a3;
-  --success: #22c55e;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="system"],
-  :root:not([data-theme]) {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --text: #f8fafc;
-    --text-2: #94a3b8;
-    --text-3: #64748b;
-    --border: #334155;
-    --track: #26324a;
-    --primary: #818cf8;
-    --primary-soft: #3730a3;
-    --success: #22c55e;
-  }
-}
+/* TimeTrack dashboard（Side Panel）— 与 popup 共用同一套克制的设计语言
+   设计令牌（颜色 / 圆角 / 深浅主题）见共享 tokens.css */
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -78,7 +36,21 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.db-brand { font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
+.db-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.brand-logo {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  display: block;
+}
 
 .icon-gear {
   display: inline-flex;
@@ -235,7 +207,7 @@ body {
 .bar { fill: var(--primary-soft); transition: fill 0.12s ease; }
 .bar.is-latest { fill: var(--primary); }
 .bar.is-hover { fill: var(--primary); }
-.axis-label { fill: var(--text-3); font-size: 9px; }
+.axis-label { fill: var(--text-3); font-size: 10px; font-weight: 500; }
 
 /* 统一图表 tooltip（深浅主题一致的深底浅字） */
 .chart-tooltip {
@@ -343,10 +315,13 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 0;
+  padding: 9px 10px;
+  margin: 0 -10px;
+  border-radius: 8px;
   cursor: pointer;
 }
 .rank-row + .rank-row { border-top: 1px solid var(--track); }
+.rank-row:hover { background: var(--track); }
 .rank-row:hover .rank-domain { color: var(--primary); }
 
 .site-favicon,

@@ -1,12 +1,13 @@
 // popup.js — 只负责展示：每 2s 向 background 请求一次实时数据（SKILL 第 26 节）。
 // 所有动态文本走 textContent / DOM API，不用 innerHTML 拼接数据，避免 XSS。
 
-import { formatDuration, percentChange } from './utils.js';
+import { formatDuration, makeDeltaLabel, sendMessage } from './utils.js';
 import { t, isZh, uiDate, UI_LOCALE, applyI18n } from './i18n.js';
 import { applyTheme } from './theme.js';
 
 const REFRESH_MS = 2000;
 const TOP_N = 5;
+const deltaLabel = makeDeltaLabel(t);
 
 const el = {
   dateLabel: document.getElementById('dateLabel'),
@@ -18,22 +19,6 @@ const el = {
   emptyState: document.getElementById('emptyState'),
   errorState: document.getElementById('errorState')
 };
-
-function sendMessage(message) {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(message, (response) => {
-      if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
-      else resolve(response);
-    });
-  });
-}
-
-function deltaLabel(total, yesterdayTotal) {
-  const pct = percentChange(total, yesterdayTotal);
-  if (pct === null) return total > 0 ? t('deltaFirst') : '';
-  if (pct === 0) return t('deltaSame');
-  return t(pct > 0 ? 'deltaUp' : 'deltaDown', String(Math.abs(pct)));
-}
 
 function renderCurrent(current) {
   el.currentSite.textContent = '';
