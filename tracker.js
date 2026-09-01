@@ -15,7 +15,9 @@ import { normalizeDomain, splitDurationByLocalDay, dateKey } from './utils.js';
  * @param {{now?: () => number}} [opts] 注入时钟，生产环境用默认 Date.now
  */
 export function createTracker(store, { now: nowFn = Date.now } = {}) {
-  // seg: { tabId:number, domain:string, startedAt:number, isNewVisit:boolean } | null
+  // seg: { tabId:number, domain:string, startedAt:number, sessionStart:number, isNewVisit:boolean } | null
+  // sessionStart 是本次"会话"（连续浏览段）的真实起点；startedAt 是最近一次结算的结转点，
+  // checkpoint 只推进 startedAt 而保留 sessionStart，因此兜底保存不会把一次会话切成碎片。
   let seg = null;
 
   /** 把一次访问标记到最后一片（计入段结束当天），不改变时长。 */
@@ -24,7 +26,7 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     return pieces;
   }
 
-  /** 结算当前活跃段：[startedAt, at) 按本地天拆分后累加，不主动改 current。 */
+  /** 结算当前活跃段：[startedAt, at) 按本地天拆分后累加，并记录一次会话；不主动改 current。 */
   function settle(at) {
     if (!seg) return;
     const pieces = stampVisit(
@@ -32,12 +34,14 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
       seg.isNewVisit
     );
     store.addTime(seg.domain, pieces, at);
+    const start = seg.sessionStart ?? seg.startedAt;
+    if (at > start) store.addSession(seg.domain, { start, end: at, ms: at - start });
     seg = null;
   }
 
   /** 开一段新计时。domain 由调用方规范化好，isNewVisit 由调用场景决定。 */
   function open(tabId, domain, at, isNewVisit) {
-    seg = { tabId, domain, startedAt: at, isNewVisit };
+    seg = { tabId, domain, startedAt: at, sessionStart: at, isNewVisit };
     store.setCurrent({ ...seg });
   }
 
@@ -111,7 +115,13 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
       current.isNewVisit
     );
     store.addTime(current.domain, pieces, at);
-    seg = { tabId: current.tabId, domain: current.domain, startedAt: at, isNewVisit: false };
+    seg = {
+      tabId: current.tabId,
+      domain: current.domain,
+      startedAt: at,
+      sessionStart: current.sessionStart ?? current.startedAt, // 会话延续，不重置
+      isNewVisit: false
+    };
     store.setCurrent({ ...seg });
   }
 
@@ -183,6 +193,27 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     return range;
   }
 
+  /**
+   * 单个网站详情实时统计 = store.getDetail + 当前未结算段（仅当正在浏览该 domain）。
+   * 未结束的会话不提前计入 recentSessions / visits。
+   */
+  function liveDetail(domain, todayKey, at = nowFn()) {
+    const detail = store.getDetail(domain, todayKey);
+    if (!detail || !seg || seg.domain !== domain) return detail;
+
+    for (const piece of splitDurationByLocalDay(seg.startedAt, at)) {
+      if (piece.date === todayKey) detail.today.ms += piece.ms;
+      if (piece.date >= detail.last30Start) {
+        detail.last30.ms += piece.ms;
+        if (piece.date >= detail.last7Start) detail.last7.ms += piece.ms;
+      }
+      detail.total.ms += piece.ms;
+      const point = detail.series.find((p) => p.date === piece.date);
+      if (point) point.ms += piece.ms;
+    }
+    return detail;
+  }
+
   return {
     track,
     navigate,
@@ -194,6 +225,7 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
     restore,
     getActiveSegment,
     liveDay,
-    liveRange
+    liveRange,
+    liveDetail
   };
 }

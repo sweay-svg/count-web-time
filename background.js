@@ -127,7 +127,7 @@ const RANGE_DAYS = new Set([1, 7, 30]);
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   const type = message?.type;
-  if (type !== 'GET_DASH' && type !== 'GET_RANGE') return false;
+  if (type !== 'GET_DASH' && type !== 'GET_RANGE' && type !== 'GET_DETAIL') return false;
   ready
     .then(async () => {
       const todayKey = dateKey();
@@ -141,13 +141,23 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         });
         return;
       }
-      // GET_RANGE：Dashboard 的 Today / 7D / 30D
-      const days = RANGE_DAYS.has(message.days) ? message.days : 1;
-      const endDate = typeof message.endDate === 'string' ? message.endDate : todayKey;
+      if (type === 'GET_RANGE') {
+        // GET_RANGE：Dashboard 的 Today / 7D / 30D
+        const days = RANGE_DAYS.has(message.days) ? message.days : 1;
+        const endDate = typeof message.endDate === 'string' ? message.endDate : todayKey;
+        sendResponse({
+          today: todayKey,
+          current: tracker.getActiveSegment(),
+          range: tracker.liveRange(endDate, days, at)
+        });
+        return;
+      }
+      // GET_DETAIL：Website Detail（第三阶段）
+      const domain = typeof message.domain === 'string' && message.domain ? message.domain : null;
       sendResponse({
         today: todayKey,
         current: tracker.getActiveSegment(),
-        range: tracker.liveRange(endDate, days, at)
+        detail: domain ? tracker.liveDetail(domain, todayKey, at) : null
       });
     })
     .catch((err) => {

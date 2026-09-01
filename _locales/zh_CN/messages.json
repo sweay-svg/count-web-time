@@ -95,6 +95,9 @@
   "visits": {
     "message": "$1 次访问"
   },
+  "visitOne": {
+    "message": "$1 次访问"
+  },
   "ariaPrev": {
     "message": "前一天"
   },
@@ -103,5 +106,35 @@
   },
   "ariaSort": {
     "message": "网站排序方式"
+  },
+  "back": {
+    "message": "返回"
+  },
+  "avgSession": {
+    "message": "平均会话"
+  },
+  "visitCount": {
+    "message": "访问次数"
+  },
+  "dailyActivity": {
+    "message": "每日活动"
+  },
+  "recentSessions": {
+    "message": "最近会话"
+  },
+  "noSessions": {
+    "message": "暂无会话记录"
+  },
+  "detailActive": {
+    "message": "正在使用"
+  },
+  "detailInactive": {
+    "message": "未在使用"
+  },
+  "totalAll": {
+    "message": "全部"
+  },
+  "openDetailTitle": {
+    "message": "查看详情"
   }
 }

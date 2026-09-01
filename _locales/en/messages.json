@@ -106,5 +106,35 @@
   },
   "ariaSort": {
     "message": "Sort websites"
+  },
+  "back": {
+    "message": "Back"
+  },
+  "avgSession": {
+    "message": "Avg session"
+  },
+  "visitCount": {
+    "message": "Visits"
+  },
+  "dailyActivity": {
+    "message": "Daily activity"
+  },
+  "recentSessions": {
+    "message": "Recent sessions"
+  },
+  "noSessions": {
+    "message": "No sessions yet"
+  },
+  "detailActive": {
+    "message": "Currently active"
+  },
+  "detailInactive": {
+    "message": "Not active"
+  },
+  "totalAll": {
+    "message": "All time"
+  },
+  "openDetailTitle": {
+    "message": "View details"
   }
 }

@@ -10,7 +10,8 @@
 //   settings: { idleThresholdSeconds: 60 }
 //   stats[domain] = {
 //     domain, totalTime(ms), visitCount(全周期), lastVisited,
-//     daily: { "YYYY-MM-DD": { ms: number, visits: number } }
+//     daily: { "YYYY-MM-DD": { ms: number, visits: number } },
+//     sessions: [ { start, end, ms } ]  // 最近 MAX_SESSIONS 条已结算会话（第三阶段）
 //   }
 //   current: 当前未闭合的活跃段（由 tracker 维护，store 只透传），无则为 null
 
@@ -20,12 +21,20 @@ export const DEFAULT_SETTINGS = Object.freeze({
   idleThresholdSeconds: 60
 });
 
+// 每个 domain 保留的最近会话条数（够展示"最近"，又不让数据无限膨胀）。
+const MAX_SESSIONS = 30;
+
 const STORAGE_KEYS = ['settings', 'stats', 'current'];
 
-// 旧版本 daily 直接存毫秒数，加载时就地迁移为 { ms, visits: 0 }。
+// 旧版本 daily 直接存毫秒数，加载时就地迁移为 { ms, visits: 0 }；
+// 并给缺失 sessions 的历史站点补空数组。
 function migrateDaily(stats) {
   let migrated = false;
   for (const site of Object.values(stats)) {
+    if (!Array.isArray(site.sessions)) {
+      site.sessions = [];
+      migrated = true;
+    }
     if (!site.daily) {
       site.daily = {};
       migrated = true;
@@ -104,7 +113,8 @@ export function createStore(backend) {
         totalTime: 0,
         visitCount: 0,
         lastVisited: 0,
-        daily: {}
+        daily: {},
+        sessions: []
       };
     }
 
@@ -119,6 +129,77 @@ export function createStore(backend) {
     }
     site.lastVisited = now;
     dirty.add('stats');
+  }
+
+  /**
+   * 记录一次已结束的会话（由 tracker 在段结算时调用）。
+   * 只保留最近 MAX_SESSIONS 条；过旧自动淘汰。
+   * @param {string} domain
+   * @param {{start: number, end: number, ms: number}} session
+   */
+  function addSession(domain, session) {
+    if (!domain || !session || !Number.isFinite(session.ms) || session.ms <= 0) return;
+    const { stats } = ensureLoaded();
+    const site = stats[domain];
+    if (!site) return; // 防御：正常路径 addTime 已先创建站点
+    if (!Array.isArray(site.sessions)) site.sessions = [];
+    site.sessions.push(session);
+    if (site.sessions.length > MAX_SESSIONS) {
+      site.sessions.splice(0, site.sessions.length - MAX_SESSIONS);
+    }
+    dirty.add('stats');
+  }
+
+  /**
+   * 单个网站详情（SKILL 34：Today / 7D / 30D / Total / 访问次数 / 平均会话 / 每日活动 / 最近会话）。
+   * @param {string} domain
+   * @param {string} todayKey 参考"今天"（本地），由调用方（background）以真实时间传入
+   * @returns {object|null}
+   */
+  function getDetail(domain, todayKey) {
+    const site = ensureLoaded().stats[domain];
+    if (!site) return null;
+
+    const cell = (date) => readCell(site.daily[date]);
+    // 含首尾天的区间累计
+    const rangeMs = (startDate, endDate) => {
+      let ms = 0;
+      let visits = 0;
+      for (let k = startDate; ; ) {
+        const c = cell(k);
+        ms += c.ms;
+        visits += c.visits;
+        if (k === endDate) break;
+        k = shiftDateKey(k, 1);
+      }
+      return { ms, visits };
+    };
+
+    const last7Start = shiftDateKey(todayKey, -6);
+    const last30Start = shiftDateKey(todayKey, -29);
+    const series = [];
+    for (let i = 29; i >= 0; i--) {
+      const date = shiftDateKey(todayKey, -i);
+      series.push({ date, ms: cell(date).ms });
+    }
+
+    const sessions = Array.isArray(site.sessions) ? site.sessions : [];
+    const avgSession = sessions.length
+      ? Math.round(sessions.reduce((sum, s) => sum + s.ms, 0) / sessions.length)
+      : (site.visitCount > 0 ? Math.round(site.totalTime / site.visitCount) : 0);
+
+    return {
+      domain,
+      today: cell(todayKey),
+      last7: rangeMs(last7Start, todayKey),
+      last30: rangeMs(last30Start, todayKey),
+      total: { ms: site.totalTime, visits: site.visitCount },
+      avgSession,
+      last7Start,
+      last30Start,
+      series,
+      recentSessions: [...sessions].reverse().slice(0, 10)
+    };
   }
 
   /** 写入/清除当前未闭合活跃段。 */
@@ -203,9 +284,11 @@ export function createStore(backend) {
     getSettings,
     updateSettings,
     addTime,
+    addSession,
     setCurrent,
     persist,
     getDay,
-    getRange
+    getRange,
+    getDetail
   };
 }
