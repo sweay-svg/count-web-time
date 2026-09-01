@@ -30,10 +30,10 @@
     "message": "No active page"
   },
   "deltaUp": {
-    "message": "↑ $1$% vs yesterday"
+    "message": "↑ $1% vs yesterday"
   },
   "deltaDown": {
-    "message": "↓ $1$% vs yesterday"
+    "message": "↓ $1% vs yesterday"
   },
   "deltaSame": {
     "message": "Same as yesterday"
@@ -42,7 +42,7 @@
     "message": "First day of tracking"
   },
   "shareToday": {
-    "message": "$1$% of today"
+    "message": "$1% of today"
   },
   "rangeToday": {
     "message": "Today"
@@ -87,16 +87,16 @@
     "message": "No browsing activity in this period"
   },
   "todayLabel": {
-    "message": "Today · $1$"
+    "message": "Today · $1"
   },
   "shareTotal": {
-    "message": "$1$% of total"
+    "message": "$1% of total"
   },
   "visits": {
-    "message": "$1$ visits"
+    "message": "$1 visits"
   },
   "visitOne": {
-    "message": "$1$ visit"
+    "message": "$1 visit"
   },
   "ariaPrev": {
     "message": "Previous day"

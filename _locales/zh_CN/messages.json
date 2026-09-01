@@ -30,10 +30,10 @@
     "message": "当前没有活动页面"
   },
   "deltaUp": {
-    "message": "较昨天 ↑ $1$%"
+    "message": "较昨天 ↑ $1%"
   },
   "deltaDown": {
-    "message": "较昨天 ↓ $1$%"
+    "message": "较昨天 ↓ $1%"
   },
   "deltaSame": {
     "message": "与昨天持平"
@@ -42,7 +42,7 @@
     "message": "记录的第一天"
   },
   "shareToday": {
-    "message": "占今日 $1$%"
+    "message": "占今日 $1%"
   },
   "rangeToday": {
     "message": "今天"
@@ -87,13 +87,13 @@
     "message": "该时段还没有浏览记录"
   },
   "todayLabel": {
-    "message": "今天 · $1$"
+    "message": "今天 · $1"
   },
   "shareTotal": {
-    "message": "占比 $1$%"
+    "message": "占比 $1%"
   },
   "visits": {
-    "message": "$1$ 次访问"
+    "message": "$1 次访问"
   },
   "ariaPrev": {
     "message": "前一天"
