@@ -8,7 +8,7 @@
 //   因此 service worker 被回收最多丢失一个 checkpoint 周期。
 // - visit 在"段"上标记 isNewVisit，段结束时一次性计入，checkpoint/失焦恢复不重复计数。
 
-import { normalizeDomain, splitDurationByLocalDay, dateKey } from './utils.js';
+import { normalizeDomain, splitDurationByLocalDay, dateKey, collectHourSet } from './utils.js';
 
 /**
  * @param {ReturnType<import('./storage.js').createStore>} store
@@ -176,6 +176,14 @@ export function createTracker(store, { now: nowFn = Date.now } = {}) {
    */
   function liveRange(endDate, days, at = nowFn()) {
     const range = store.getRange(endDate, days);
+    // "有记录小时数"（Today 视图"平均每小时"分母）：已落库 sessions + 当前活跃段。
+    const hours = store.activeHoursInDay(endDate);
+    if (seg) {
+      const [y, m, d] = endDate.split('-').map(Number);
+      const dayStart = new Date(y, m - 1, d).getTime();
+      collectHourSet(seg.startedAt, at, dayStart, dayStart + 86400000, hours);
+    }
+    range.activeHours = hours.size;
     if (!seg) return range;
 
     const indexByDate = new Map(range.keys.map((date, i) => [date, i]));

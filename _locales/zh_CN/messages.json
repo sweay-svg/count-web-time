@@ -62,6 +62,12 @@
   "dailyAverage": {
     "message": "日均时长"
   },
+  "avgPerHour": {
+    "message": "平均每小时"
+  },
+  "activeHours": {
+    "message": "活跃 $1 小时"
+  },
   "mostUsed": {
     "message": "最常用网站"
   },

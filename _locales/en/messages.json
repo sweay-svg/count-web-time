@@ -62,6 +62,12 @@
   "dailyAverage": {
     "message": "Daily average"
   },
+  "avgPerHour": {
+    "message": "Per active hour"
+  },
+  "activeHours": {
+    "message": "active $1h"
+  },
   "mostUsed": {
     "message": "Most used"
   },

@@ -185,6 +185,15 @@ body {
   text-transform: uppercase;
 }
 
+.site-favicon {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: contain;
+  padding: 3px;
+}
+
 .site-main { flex: 1; min-width: 0; }
 
 .site-line {

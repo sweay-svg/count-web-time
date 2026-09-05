@@ -15,7 +15,8 @@ const state = {
   days: 1,
   endDate: dateKey(),
   sortBy: 'time',
-  today: dateKey()
+  today: dateKey(),
+  favicons: {}           // domain → 网站图标 URL（后台从 tab.favIconUrl 捕获）
 };
 
 const el = {
@@ -30,6 +31,8 @@ const el = {
   cTotalDelta: document.getElementById('cTotalDelta'),
   cSites: document.getElementById('cSites'),
   cAvg: document.getElementById('cAvg'),
+  cAvgLabel: document.getElementById('cAvgLabel'),
+  cAvgSub: document.getElementById('cAvgSub'),
   cMost: document.getElementById('cMost'),
   chartCard: document.getElementById('chartCard'),
   chartTitle: document.getElementById('chartTitle'),
@@ -84,20 +87,28 @@ function buildRangeLabel(range) {
 
 // ---------- 网站排行 ----------
 
+function letterFallback(domain) {
+  const fallback = document.createElement('div');
+  fallback.className = 'site-fallback';
+  fallback.textContent = domain.charAt(0);
+  return fallback;
+}
+
 function faviconNode(domain) {
-  const img = document.createElement('img');
-  img.className = 'site-favicon';
-  img.width = 26;
-  img.height = 26;
-  img.alt = '';
-  img.src = `chrome://favicon/size/18@1x/https://${domain}`;
-  img.addEventListener('error', () => {
-    const fallback = document.createElement('div');
-    fallback.className = 'site-fallback';
-    fallback.textContent = domain.charAt(0);
-    img.replaceWith(fallback);
-  }, { once: true });
-  return img;
+  // 优先用后台捕获的网站真实图标；无缓存或加载失败时回退首字母方块
+  const url = state.favicons?.[domain];
+  if (url) {
+    const img = document.createElement('img');
+    img.className = 'site-favicon';
+    img.width = 26;
+    img.height = 26;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.src = url;
+    img.addEventListener('error', () => img.replaceWith(letterFallback(domain)), { once: true });
+    return img;
+  }
+  return letterFallback(domain);
 }
 
 function sortRows(rows) {
@@ -247,10 +258,27 @@ async function refreshDetail() {
   el.errorState.hidden = true;
   el.detailView.hidden = false;
   state.today = resp.today;
+  state.favicons = resp.favicons ?? state.favicons;
   renderDetail(resp.detail, resp.current);
 }
 
-// ---------- 视图切换 ----------
+// ---------- 视图切换（详情为 hash 子路由） ----------
+
+const DETAIL_HASH_PREFIX = '#/detail/';
+
+function detailHash(domain) {
+  return DETAIL_HASH_PREFIX + encodeURIComponent(domain);
+}
+
+function detailFromHash() {
+  const h = location.hash;
+  if (!h.startsWith(DETAIL_HASH_PREFIX)) return null;
+  try {
+    return decodeURIComponent(h.slice(DETAIL_HASH_PREFIX.length));
+  } catch {
+    return null;
+  }
+}
 
 function setView(view) {
   state.view = view;
@@ -259,15 +287,40 @@ function setView(view) {
   el.tabs.style.display = view === 'list' ? '' : 'none';
 }
 
+// 依据当前 hash 同步视图（子路由入口；浏览器前进/后退也走这里）
+function applyHash() {
+  const domain = detailFromHash();
+  if (domain) {
+    if (state.view !== 'detail' || state.activeDomain !== domain) {
+      state.activeDomain = domain;
+      setView('detail');
+      refreshDetail();
+    }
+  } else if (state.view !== 'list') {
+    setView('list');
+    refresh();
+  }
+}
+
 function showDetail(domain) {
-  state.activeDomain = domain;
-  setView('detail');
-  refreshDetail();
+  const target = detailHash(domain);
+  if (location.hash === target) {
+    // 已在该子路由，直接渲染
+    state.activeDomain = domain;
+    setView('detail');
+    refreshDetail();
+  } else {
+    location.hash = target; // 触发 hashchange → applyHash
+  }
 }
 
 function showList() {
-  setView('list');
-  refresh();
+  if (location.hash) {
+    location.hash = ''; // 触发 hashchange → applyHash 回到列表
+  } else {
+    setView('list');
+    refresh();
+  }
 }
 
 // ---------- 列表视图渲染 ----------
@@ -282,13 +335,29 @@ async function refreshList() {
   el.errorState.hidden = true;
   el.listView.hidden = false;
   state.today = resp.today;
+  state.favicons = resp.favicons ?? {};
   const { range, current, prevDayTotal } = resp;
 
   el.rangeLabel.textContent = buildRangeLabel(range);
   el.cTotal.textContent = formatDuration(range.total, { locale: UI_LOCALE });
   el.cTotalDelta.textContent = state.days === 1 ? deltaLabel(range.total, prevDayTotal ?? 0) : '';
   el.cSites.textContent = String(range.activeSites);
-  el.cAvg.textContent = formatDuration(range.averageDaily, { locale: UI_LOCALE });
+  if (state.days === 1) {
+    // 单日视图：日均=总时长（重复），改为"平均每小时访问时长"（分母=有记录的小时数）
+    el.cAvgLabel.textContent = t('avgPerHour');
+    const h = range.activeHours ?? 0;
+    if (h > 0) {
+      el.cAvg.textContent = formatDuration(Math.round(range.total / h), { locale: UI_LOCALE });
+      el.cAvgSub.textContent = t('activeHours', String(h));
+    } else {
+      el.cAvg.textContent = '–';
+      el.cAvgSub.textContent = '';
+    }
+  } else {
+    el.cAvgLabel.textContent = t('dailyAverage');
+    el.cAvg.textContent = formatDuration(range.averageDaily, { locale: UI_LOCALE });
+    el.cAvgSub.textContent = '';
+  }
   el.cMost.textContent = range.mostUsed ?? '–';
   renderCurrent(current);
 
@@ -368,5 +437,11 @@ let timer = setInterval(() => {
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) refresh();
 });
+window.addEventListener('hashchange', applyHash);
 
-refresh();
+// 初始按 URL hash 决定进入列表还是详情子路由（浏览器恢复会话时同样适用）
+if (detailFromHash()) {
+  applyHash();
+} else {
+  refresh();
+}

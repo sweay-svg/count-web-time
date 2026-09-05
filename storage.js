@@ -15,7 +15,7 @@
 //   }
 //   current: 当前未闭合的活跃段（由 tracker 维护，store 只透传），无则为 null
 
-import { shiftDateKey } from './utils.js';
+import { shiftDateKey, collectHourSet } from './utils.js';
 
 // 空闲超时可选值（秒）；chrome.idle.setDetectionInterval 最小 15s，这里给四档常用值。
 export const IDLE_OPTIONS = Object.freeze([30, 60, 120, 300]);
@@ -63,7 +63,7 @@ export function normalizeSettings(patch) {
 // 每个 domain 保留的最近会话条数（够展示"最近"，又不让数据无限膨胀）。
 const MAX_SESSIONS = 30;
 
-const STORAGE_KEYS = ['settings', 'stats', 'current'];
+const STORAGE_KEYS = ['settings', 'stats', 'current', 'favicons'];
 
 // 旧版本 daily 直接存毫秒数，加载时就地迁移为 { ms, visits: 0 }；
 // 并给缺失 sessions 的历史站点补空数组。
@@ -116,7 +116,8 @@ export function createStore(backend) {
     cache = {
       settings,
       stats: stored.stats || {},
-      current: stored.current || null
+      current: stored.current || null,
+      favicons: stored.favicons || {}
     };
     if (migrateDaily(cache.stats)) dirty.add('stats');
     return cache;
@@ -281,10 +282,12 @@ export function createStore(backend) {
     dirty.add('stats');
   }
 
-  /** 清除全部统计（保留 settings；current 由调用方 tracker.reset 处理）。 */
+  /** 清除全部统计（保留 settings；current 由调用方 tracker.reset 处理；图标缓存一并清空）。 */
   function clearAll() {
     ensureLoaded().stats = {};
+    ensureLoaded().favicons = {};
     dirty.add('stats');
+    dirty.add('favicons');
   }
 
   /**
@@ -330,6 +333,23 @@ export function createStore(backend) {
   function setCurrent(segment) {
     ensureLoaded().current = segment ?? null;
     dirty.add('current');
+  }
+
+  /**
+   * 缓存某域名的网站图标 URL（来自浏览器 tab.favIconUrl，仅 UI 展示用）。
+   * URL 未变化时不重复标记脏，避免频繁写 storage。
+   */
+  function setFavicon(domain, url) {
+    if (!domain || typeof url !== 'string' || !url) return;
+    const { favicons } = ensureLoaded();
+    if (favicons[domain] === url) return;
+    favicons[domain] = url;
+    dirty.add('favicons');
+  }
+
+  /** 返回 domain → faviconUrl 映射（供页面渲染图标）。 */
+  function getFavicons() {
+    return ensureLoaded().favicons;
   }
 
   /** 只把脏 key 写回后端；无变更时不产生写入。 */
@@ -402,6 +422,25 @@ export function createStore(backend) {
     };
   }
 
+  /**
+   * 某天有浏览记录的小时集合（基于已落库 sessions 的 start/end 覆盖小时，本地时区 0-23）。
+   * 供 Today 视图"平均每小时访问时长"作分母；跨天会话只计落在该天的小时。
+   * @param {string} date YYYY-MM-DD
+   * @returns {Set<number>}
+   */
+  function activeHoursInDay(date) {
+    const [y, m, d] = date.split('-').map(Number);
+    const dayStart = new Date(y, m - 1, d).getTime();
+    const dayEnd = dayStart + 86400000;
+    const hours = new Set();
+    for (const site of Object.values(ensureLoaded().stats)) {
+      for (const s of site.sessions ?? []) {
+        collectHourSet(s.start, s.end, dayStart, dayEnd, hours);
+      }
+    }
+    return hours;
+  }
+
   return {
     init,
     getState,
@@ -410,9 +449,12 @@ export function createStore(backend) {
     addTime,
     addSession,
     setCurrent,
+    setFavicon,
+    getFavicons,
     persist,
     getDay,
     getRange,
+    activeHoursInDay,
     getDetail,
     clearDay,
     clearAll,

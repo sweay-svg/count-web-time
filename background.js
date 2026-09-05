@@ -4,7 +4,7 @@
 
 import { createStore } from './storage.js';
 import { createTracker } from './tracker.js';
-import { dateKey, shiftDateKey } from './utils.js';
+import { dateKey, shiftDateKey, normalizeDomain } from './utils.js';
 
 const CHECKPOINT_ALARM = 'timetrack-checkpoint';
 // 开发者模式下 alarm 最小周期为 30 秒；关键状态切换另有即时持久化。
@@ -23,6 +23,10 @@ const ready = (async () => {
   chrome.idle.setDetectionInterval(store.getSettings().idleThresholdSeconds);
   const existing = await chrome.alarms.get(CHECKPOINT_ALARM);
   if (!existing) await chrome.alarms.create(CHECKPOINT_ALARM, { periodInMinutes: CHECKPOINT_PERIOD_MIN });
+  // 用当前已打开的标签页补一次图标缓存（覆盖安装/浏览器重启前已打开的页面）
+  const openedTabs = await chrome.tabs.query({});
+  for (const t of openedTabs) captureFavicon(t);
+  await store.persist();
 })();
 ready.catch((err) => console.error('[TimeTrack] boot failed:', err?.message ?? err));
 
@@ -42,6 +46,15 @@ async function queryActiveTab() {
 // 隐身窗口是否应统计（Track incognito 关闭时不统计隐身，扩展须先被允许访问隐身窗口）
 function shouldTrack(tab) {
   return !(tab?.incognito && !store.getSettings().trackIncognito);
+}
+
+// 从标签页捕获网站图标 URL（浏览器加载页面时提供 tab.favIconUrl），按域名缓存供 UI 显示。
+// 只缓存 http(s) 图标，避免超长 data: URI 占用 storage；非 http 页面归一不到域名，自然忽略。
+function captureFavicon(tab) {
+  if (!tab?.favIconUrl || !tab.url) return;
+  if (!/^https?:\/\//.test(tab.favIconUrl)) return;
+  const domain = normalizeDomain(tab.url);
+  if (domain) store.setFavicon(domain, tab.favIconUrl);
 }
 
 // 媒体播放中是否应暂停（Track media playback 开启且有声音播放时不暂停计时）
@@ -79,6 +92,7 @@ chrome.tabs.onActivated.addListener(safe('onActivated', async ({ tabId }) => {
   try {
     const tab = await chrome.tabs.get(tabId);
     tracker.track(shouldTrack(tab) ? { tabId, url: tab.url } : null);
+    captureFavicon(tab);
   } catch (err) {
     // 事件到达时 tab 已被关闭：忽略，后续 removed/activated 事件会纠偏。
     console.warn('[TimeTrack] activated tab unavailable:', err?.message ?? err);
@@ -86,11 +100,16 @@ chrome.tabs.onActivated.addListener(safe('onActivated', async ({ tabId }) => {
   await store.persist();
 }));
 
-chrome.tabs.onUpdated.addListener(safe('onUpdated', async (tabId, changeInfo) => {
-  if (!changeInfo.url) return; // 只在 URL 真正变化时处理（loading/complete 状态变化忽略）
+chrome.tabs.onUpdated.addListener(safe('onUpdated', async (tabId, changeInfo, tab) => {
+  if (!changeInfo.url && !changeInfo.favIconUrl) return; // 只在 URL 导航或图标就绪时处理
   await ready;
-  const tab = await chrome.tabs.get(tabId).catch(() => null);
-  tracker.navigate(tabId, shouldTrack(tab) ? changeInfo.url : null);
+  if (changeInfo.url) {
+    tracker.navigate(tabId, shouldTrack(tab) ? changeInfo.url : null);
+  }
+  if (changeInfo.favIconUrl) {
+    // favIconUrl 常与 url 分两次事件到达，域名用最新的 tab.url 归一
+    captureFavicon({ url: tab?.url, favIconUrl: changeInfo.favIconUrl });
+  }
   await store.persist();
 }));
 
@@ -162,7 +181,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           today: tracker.liveDay(todayKey, at),
           yesterdayTotal: store.getDay(shiftDateKey(todayKey, -1)).total,
           current: tracker.getActiveSegment(),
-          settings: store.getSettings()
+          settings: store.getSettings(),
+          favicons: store.getFavicons()
         });
         return;
       }
@@ -174,7 +194,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           today: todayKey,
           current: tracker.getActiveSegment(),
           range: tracker.liveRange(endDate, days, at),
-          prevDayTotal: store.getDay(shiftDateKey(endDate, -1)).total
+          prevDayTotal: store.getDay(shiftDateKey(endDate, -1)).total,
+          favicons: store.getFavicons()
         });
         return;
       }
@@ -184,7 +205,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         sendResponse({
           today: todayKey,
           current: tracker.getActiveSegment(),
-          detail: domain ? tracker.liveDetail(domain, todayKey, at) : null
+          detail: domain ? tracker.liveDetail(domain, todayKey, at) : null,
+          favicons: store.getFavicons()
         });
         return;
       }

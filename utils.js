@@ -112,6 +112,29 @@ export function splitDurationByLocalDay(startMs, endMs) {
 }
 
 /**
+ * 收集 [startMs, endMs) 与 [dayStartMs, dayEndMs) 交集覆盖的"小时"（本地时区 0-23）到 set。
+ * 用于计算某天有浏览记录的小时数：跨天区间只计落在该天的小时（如 23:50→次日 00:20 只计 23）。
+ * @param {number} startMs
+ * @param {number} endMs
+ * @param {number} dayStartMs 当天 00:00
+ * @param {number} dayEndMs 次日 00:00
+ * @param {Set<number>} hours
+ * @returns {Set<number>}
+ */
+export function collectHourSet(startMs, endMs, dayStartMs, dayEndMs, hours) {
+  const a = Math.max(startMs, dayStartMs);
+  const b = Math.min(endMs, dayEndMs);
+  if (b <= a) return hours;
+  let cursor = new Date(a);
+  cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate(), cursor.getHours(), 0, 0, 0);
+  while (cursor.getTime() < b) {
+    hours.add(cursor.getHours());
+    cursor = new Date(cursor.getTime() + 3600000);
+  }
+  return hours;
+}
+
+/**
  * 毫秒时长格式化（SKILL 第 24 节）。
  * - 英文（默认）：42s / 42m / 1h 42m / 1d 3h
  * - 中文（locale 以 zh 开头）：42秒 / 42分 / 1小时42分 / 1天3小时

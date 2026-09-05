@@ -331,7 +331,7 @@ body {
   height: 26px;
   border-radius: 7px;
 }
-.site-favicon { object-fit: contain; padding: 4px; }
+.site-favicon { object-fit: contain; padding: 3px; }
 .site-fallback {
   background: var(--track);
   color: var(--text-2);

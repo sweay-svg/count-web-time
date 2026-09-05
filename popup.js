@@ -37,7 +37,29 @@ function renderCurrent(current) {
   el.currentSite.append(dot, label);
 }
 
-function renderSites(rows, total) {
+function letterAvatar(domain) {
+  const avatar = document.createElement('div');
+  avatar.className = 'site-avatar';
+  avatar.textContent = domain.charAt(0);
+  return avatar;
+}
+
+// 优先后台捕获的真实图标，无缓存/加载失败回退首字母
+function siteIconNode(domain, favicons) {
+  const url = favicons?.[domain];
+  if (url) {
+    const img = document.createElement('img');
+    img.className = 'site-favicon';
+    img.alt = '';
+    img.loading = 'lazy';
+    img.src = url;
+    img.addEventListener('error', () => img.replaceWith(letterAvatar(domain)), { once: true });
+    return img;
+  }
+  return letterAvatar(domain);
+}
+
+function renderSites(rows, total, favicons) {
   el.siteList.textContent = '';
   const top = rows.slice(0, TOP_N);
   const maxMs = top[0]?.ms ?? 1;
@@ -49,9 +71,7 @@ function renderSites(rows, total) {
     const item = document.createElement('div');
     item.className = 'site-row';
 
-    const avatar = document.createElement('div');
-    avatar.className = 'site-avatar';
-    avatar.textContent = row.domain.charAt(0);
+    const avatar = siteIconNode(row.domain, favicons);
 
     const main = document.createElement('div');
     main.className = 'site-main';
@@ -103,7 +123,7 @@ async function render() {
 
   el.emptyState.hidden = hasData;
   el.topSection.style.display = hasData ? '' : 'none';
-  if (hasData) renderSites(today.rows, today.total);
+  if (hasData) renderSites(today.rows, today.total, resp.favicons);
 }
 
 function init() {
